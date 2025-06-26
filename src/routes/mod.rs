@@ -1,4 +1,7 @@
-use axum::Router;
+use std::fmt::format;
+
+use axum::{http::{StatusCode, Uri}, Router};
+use log::warn;
 
 use crate::config::AppState;
 
@@ -12,3 +15,4 @@ pub fn routers() -> Router<AppState>{
         // .nest("/api/v1/peers", peers::router())
         .nest("/api/v1/auth", auth::router())
 }
+
