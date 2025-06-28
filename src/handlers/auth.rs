@@ -4,16 +4,16 @@ use axum::{
 };
 use axum_session::{Session, SessionNullPool};
 use log::info;
+use serde::Serialize;
 
 use crate::{config::AppState, dto::auth::callback::CallbackParams, services::auth::AuthService};
 
-pub async fn login(State(state): State<AppState>, session:Session<SessionNullPool>) -> Redirect {
+pub async fn login(State(state): State<AppState>, session: Session<SessionNullPool>) -> Redirect {
     // init service
     let auth_service = AuthService::new(state.clone());
 
     // generate resource server auth url
     let (auth_url, csrf, _nonce) = auth_service.resource_auth_url().await.unwrap();
-
     info!("generated url:{}", auth_url);
 
     // register session on cookie
@@ -22,7 +22,6 @@ pub async fn login(State(state): State<AppState>, session:Session<SessionNullPoo
     Redirect::to(auth_url.as_str())
 }
 
-//http://127.0.0.1:8080/realms/local/broker/github/endpoint?code=720668456b50455b6e7a&state=OlDihfNaJoXAcSojfPIxzXpnYbzC4GKDBzVnCM6bpgg.V5lJG6KKyIE.asTBZsOrRV6v3TzR2HXByA
 pub async fn callback(
     State(app_state): State<AppState>,
     session: Session<SessionNullPool>,
@@ -34,10 +33,10 @@ pub async fn callback(
     );
 
     let res_csrf = session.get("oauth_state").unwrap_or("failed".to_string());
+
     if callback_params.state != res_csrf {
         return Redirect::to(format!("{}/", app_state.config.be_app_url).as_str()).into_response();
     }
-    
 
     Redirect::to(format!("{}/home", app_state.config.be_app_url).as_str()).into_response()
 }
