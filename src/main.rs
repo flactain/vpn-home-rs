@@ -1,8 +1,12 @@
 use std::sync::Arc;
 
+use axum::routing::get;
 use axum_session::{SessionConfig, SessionLayer, SessionNullPool, SessionStore};
 use log::{info, warn};
-use vpn_server_rs::{config::{self, AppState}, handlers};
+use vpn_server_rs::{
+    config::{self, AppState},
+    handlers,
+};
 
 #[tokio::main]
 async fn main() {
@@ -26,10 +30,11 @@ async fn main() {
     let app = vpn_server_rs::routes::routers()
         .with_state(state)
         .layer(SessionLayer::new(session_store))
-        .fallback(handlers::fallback::fallback_handler);
+        .fallback(handlers::fallback::fallback_handler)
+        .route("/home", get(|| async {"hello"}));
+    
 
     // server up
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
-

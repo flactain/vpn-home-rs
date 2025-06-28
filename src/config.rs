@@ -11,6 +11,7 @@ pub struct Config {
     pub keycloak_url: String,
     pub be_app_url: String,
     pub be_app_url_api: String,
+    pub fe_app_url: String
 }
 
 impl Config {

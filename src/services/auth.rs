@@ -1,10 +1,16 @@
-use std::sync::Arc;
+use anyhow::anyhow;
+use jsonwebtoken::{EncodingKey, Header};
+use log::info;
+use serde::{Deserialize, Serialize};
+use std::{convert, sync::Arc};
 
+use axum_session::{Session, SessionNullPool};
 use openidconnect::{
-    ClientId, ClientSecret, CsrfToken, EmptyAdditionalClaims, EmptyExtraTokenFields,
-    EndpointMaybeSet, EndpointNotSet, EndpointSet, IdTokenFields, IssuerUrl, Nonce, RedirectUrl,
-    RevocationErrorResponseType, StandardErrorResponse, StandardTokenIntrospectionResponse,
-    StandardTokenResponse,
+    AuthorizationCode, ClientId, ClientSecret, CsrfToken, EmptyAdditionalClaims,
+    EmptyExtraTokenFields, EndpointMaybeSet, EndpointNotSet, EndpointSet, IdTokenClaims,
+    IdTokenFields, IssuerUrl, Nonce, NonceVerifier, RedirectUrl, RevocationErrorResponseType,
+    StandardErrorResponse, StandardTokenIntrospectionResponse, StandardTokenResponse,
+    TokenResponse,
     core::{
         CoreAuthDisplay, CoreAuthPrompt, CoreAuthenticationFlow, CoreClient, CoreErrorResponseType,
         CoreGenderClaim, CoreJsonWebKey, CoreJweContentEncryptionAlgorithm,
@@ -45,15 +51,15 @@ type DiscoveredClient = openidconnect::Client<
     EndpointMaybeSet,
 >;
 /// Service for Authorization.
-/// this service offers authorization processing based on OIDC.
+/// this service offers authorization processing based on OIDC
 /// you need to configure authorization server url, your be url.
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```
 /// let auth_service = AuthService::new();
 /// let auth_client = auth_service.get_auth_client();
-/// 
+///
 /// let (resource_auth_url, _csrf_token, _nonce) = auth_client.resource_auth_url();
 /// ```
 pub struct AuthService {
@@ -63,6 +69,16 @@ pub struct AuthService {
     http_client: Client,
     /// Config
     config: Arc<Config>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct CustomClaims{
+            pub user_id:String, 
+            pub name: String,
+            pub iss: String,
+            pub exp: i64,
+            pub iat: i64,
+            pub auth_time: Option<i64>,
 }
 
 impl AuthService {
@@ -78,7 +94,7 @@ impl AuthService {
         }
     }
 
-    pub fn get_http_client(&self)-> &Client {
+    pub fn get_http_client(&self) -> &Client {
         &self.http_client
     }
 
@@ -117,5 +133,58 @@ impl AuthService {
             )
             .url();
         Ok((auth_url, csrf_token, nonce))
+    }
+
+    pub async fn try_token(
+        &self,
+        session: Session<SessionNullPool>,
+        state: String,
+        code: String,
+    ) -> anyhow::Result<IdTokenClaims<EmptyAdditionalClaims, CoreGenderClaim>> {
+        let csrf_token: String = session
+            .get("csrf_token")
+            .ok_or_else(|| anyhow::anyhow!("Missing CSRF token"))?;
+        let nonce: Nonce = Nonce::new(
+            session
+                .get("nonce")
+                .ok_or_else(|| anyhow::anyhow!("Missing nonce token"))?,
+        );
+
+        if state != csrf_token {
+            anyhow::anyhow!("Different csrf token");
+        }
+
+        let token = &self
+            .get_auth_client()
+            .await?
+            .exchange_code(AuthorizationCode::new(code))?
+            .request_async(self.get_http_client())
+            .await?;    
+
+
+        let id_token = token
+            .id_token()
+            .ok_or_else(|| anyhow::anyhow!("Cannot get ID token"))?;
+
+        let claims = id_token.claims(&self.get_auth_client().await?.id_token_verifier(), &nonce)?;
+
+        Ok(claims.clone())
+    }
+
+    fn convert(claims: &IdTokenClaims<EmptyAdditionalClaims, CoreGenderClaim>)-> CustomClaims{
+        CustomClaims{
+            user_id: claims.subject().to_string(),
+            name: claims.name().unwrap().get(None).unwrap().to_string(),
+            iss: "vpn-home-rs".to_string(),
+            exp: claims.expiration().timestamp(),
+            iat: claims.issue_time().timestamp(),
+            auth_time: Some(claims.auth_time().unwrap().timestamp()),
+        }
+    }
+
+    pub fn make_jwt(&self, claims: IdTokenClaims<EmptyAdditionalClaims, CoreGenderClaim>)->anyhow::Result<String>{
+        let custom_claims = Self::convert(&claims);
+        let jwt = jsonwebtoken::encode(&Header::default(), &custom_claims, &EncodingKey::from_secret("secret".as_ref()))?;
+        Ok(jwt)
     }
 }
