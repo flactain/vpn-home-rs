@@ -33,6 +33,7 @@ pub async fn callback(
     callback_params: Query<CallbackParams>,
 ) -> impl IntoResponse {
 
+    debug!("callback!!");
     //init service
     let auth_service = AuthService::new(app_state.clone());
 
@@ -60,12 +61,12 @@ pub async fn callback(
     );
     headers.insert(
         "Set-Cookie",
-        HeaderValue::from_str(format!("jwt={}; HttpOnly; Path=/", jwt).as_str()).unwrap(),
+        HeaderValue::from_str(format!("jwt={}; HttpOnly:false; Path=/", jwt).as_str()).unwrap(),
     );
 
     (
         Some(headers),
-        Redirect::to(format!("{}/home", app_state.config.be_app_url.clone()).as_str())
+        Redirect::to(format!("{}/home", app_state.config.fe_app_url.clone()).as_str())
             .into_response(),
     )
 }

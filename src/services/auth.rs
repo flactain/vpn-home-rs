@@ -1,6 +1,6 @@
 use anyhow::anyhow;
 use jsonwebtoken::{EncodingKey, Header};
-use log::info;
+use log::{debug, info, warn};
 use serde::{Deserialize, Serialize};
 use std::{convert, sync::Arc};
 
@@ -107,6 +107,8 @@ impl AuthService {
                 )
                 .await?;
 
+                warn!("issue url : {:?}", IssuerUrl::new(self.config.keycloak_url.clone()).unwrap());
+
                 let client = CoreClient::from_provider_metadata(
                     provider_metadata,
                     ClientId::new(self.config.oauth_client_id.clone()),
@@ -122,7 +124,8 @@ impl AuthService {
             .await
     }
 
-    pub async fn resource_auth_url(self) -> anyhow::Result<(Url, CsrfToken, Nonce)> {
+    pub async fn resource_auth_url(&self) -> anyhow::Result<(Url, CsrfToken, Nonce)> {
+        warn!("test");
         let (auth_url, csrf_token, nonce) = self
             .get_auth_client()
             .await?
