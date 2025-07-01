@@ -125,7 +125,6 @@ impl AuthService {
     }
 
     pub async fn resource_auth_url(&self) -> anyhow::Result<(Url, CsrfToken, Nonce)> {
-        warn!("test");
         let (auth_url, csrf_token, nonce) = self
             .get_auth_client()
             .await?
@@ -176,7 +175,7 @@ impl AuthService {
 
     fn convert(claims: &IdTokenClaims<EmptyAdditionalClaims, CoreGenderClaim>)-> CustomClaims{
         CustomClaims{
-            user_id: claims.subject().to_string(),
+            user_id: claims.preferred_username().unwrap().to_string(),
             name: claims.name().unwrap().get(None).unwrap().to_string(),
             iss: "vpn-home-rs".to_string(),
             exp: claims.expiration().timestamp(),
