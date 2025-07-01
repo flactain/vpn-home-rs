@@ -12,6 +12,13 @@ use serde::Serialize;
 
 use crate::{config::AppState, dto::auth::callback::CallbackParams, services::auth::AuthService};
 
+///  login handler
+/// 
+/// # Examples
+/// 
+/// ```
+/// example code
+/// ```
 pub async fn login(State(state): State<AppState>, session: Session<SessionNullPool>) -> Redirect {
     // init service
     let auth_service = AuthService::new(state.clone());
@@ -27,6 +34,13 @@ pub async fn login(State(state): State<AppState>, session: Session<SessionNullPo
     Redirect::to(auth_url.as_str())
 }
 
+/// login callback called by keycloak(idp: github)
+/// 
+/// # Examples
+/// 
+/// ```
+/// example code
+/// ```
 pub async fn callback(
     State(app_state): State<AppState>,
     session: Session<SessionNullPool>,
