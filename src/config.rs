@@ -11,7 +11,7 @@ pub struct Config {
     pub keycloak_url: String,
     pub be_app_url: String,
     pub be_app_url_api: String,
-    pub fe_app_url: String
+    pub fe_app_url: String,
 }
 
 impl Config {
@@ -31,11 +31,11 @@ impl Config {
 
         let config = envy::from_env::<Config>();
         debug!("road configs are {:?}", config.as_ref().unwrap());
-        
+
         config
     }
 }
 #[derive(Clone)]
-pub struct AppState{
+pub struct AppState {
     pub config: Arc<Config>,
 }
