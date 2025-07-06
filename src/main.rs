@@ -7,6 +7,7 @@ use axum::{
     },
     routing::get,
 };
+use axum_cookie::CookieLayer;
 use axum_session::{SessionConfig, SessionLayer, SessionNullPool, SessionStore};
 use log::{info, warn};
 use tower_http::cors::CorsLayer;
@@ -36,6 +37,7 @@ async fn main() {
     // routing
     let app = vpn_server_rs::routes::routers()
         .with_state(state.clone())
+        .layer(CookieLayer::default())
         .layer(SessionLayer::new(session_store))
         .layer(
             CorsLayer::new()
