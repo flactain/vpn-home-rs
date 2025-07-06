@@ -1,18 +1,15 @@
-use std::{collections::HashMap, str::FromStr};
 
 use axum::{
     extract::{Path, Query, State},
-    http::{HeaderMap, HeaderValue},
-    response::{IntoResponse, Redirect, Response},
+    response::{IntoResponse, Redirect},
 };
 use axum_cookie::{
     CookieManager,
-    cookie::{Cookie, CookieJar},
+    cookie::{Cookie},
 };
 use axum_session::{Session, SessionNullPool};
-use chrono::format;
-use log::{debug, error, info};
-use openidconnect::{HttpRequest, PkceCodeVerifier, url::Url};
+use log::{debug,  info};
+use openidconnect::{ url::Url};
 use uuid::Uuid;
 
 use crate::{
@@ -104,6 +101,7 @@ pub async fn callback(
         )
         .await
         .unwrap();
+    debug!("id_token: {}",id_token);
 
     //remove cookie
     cookie_manager.remove("session_state_id");
@@ -116,8 +114,7 @@ pub async fn callback(
 
     // set fragment to redirect url
    let mut redirect_url = Url::parse(format!("{}/callback", app_state.config.fe_app_url.clone()).as_str()).unwrap();
-        redirect_url.set_fragment(Some(&format!("id_token={}", id_token)));
-        redirect_url.set_fragment(Some(&format!("access_token={}", access_token.into_secret())));
+        redirect_url.set_fragment(Some(&format!("id_token={}&access_token={}", id_token, access_token.into_secret())));
 
     (Redirect::to(redirect_url.as_str()).into_response(),)
 }
