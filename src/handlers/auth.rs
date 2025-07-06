@@ -115,7 +115,7 @@ pub async fn callback(
     cookie_manager.set(cookie);
 
     // set fragment to redirect url
-    let mut redirect_url = Url::parse(format!("{}/", app_state.config.fe_app_url.clone()).as_str()).unwrap();
+   let mut redirect_url = Url::parse(format!("{}/callback", app_state.config.fe_app_url.clone()).as_str()).unwrap();
         redirect_url.set_fragment(Some(&format!("id_token={}", id_token)));
         redirect_url.set_fragment(Some(&format!("access_token={}", access_token.into_secret())));
 
