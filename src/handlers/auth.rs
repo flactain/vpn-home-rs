@@ -1,15 +1,13 @@
+use std::{collections::HashMap, str::FromStr};
 
 use axum::{
     extract::{Path, Query, State},
     response::{IntoResponse, Redirect},
 };
-use axum_cookie::{
-    CookieManager,
-    cookie::{Cookie},
-};
+use axum_cookie::{CookieManager, cookie::Cookie};
 use axum_session::{Session, SessionNullPool};
-use log::{debug,  info};
-use openidconnect::{ url::Url};
+use log::{debug, info};
+use openidconnect::url::Url;
 use uuid::Uuid;
 
 use crate::{
@@ -37,7 +35,7 @@ pub async fn login(
     let (auth_url, csrf, nonce, pkce_verifier) = auth_service.resource_auth_url().await.unwrap();
     info!("generated url:{}", auth_url);
 
-    // create session state for verifying in callback handler
+    // create session state for vertifying in callback handler
     let session_state_id = Uuid::new_v4().to_string();
     let session_state = SessionState::new(
         csrf,
@@ -59,13 +57,25 @@ pub async fn login(
 
     Redirect::to(auth_url.as_str()).into_response()
 }
-pub async fn logout(State(state): State<AppState>) -> impl IntoResponse {
+pub async fn logout(
+    State(state): State<AppState>,
+    Query(query_params): Query<HashMap<String, String>>,
+) -> impl IntoResponse {
+    let id_token = query_params.get("idToken").unwrap();
+    debug!("logout idToken: {}", id_token);
+
+    let mut url =
+        Url::parse("http://127.0.0.1:8080/realms/local/protocol/openid-connect/logout").unwrap();
+
+    url.query_pairs_mut()
+        .append_pair("id_token_hint", id_token)
+        .append_pair(
+            "post_logout_redirect_uri",
+            state.config.fe_app_url.clone().as_str(),
+        );
+
     //init service
-    Redirect::to(
-                format!("http://127.0.0.1:8080/realms/local/protocol/openid-connect/logout?id_token_hint={}&post_logout_redirect_uri={}",
-                "a",state.config.fe_app_url.clone()).as_str()
-                )
-                .into_response()
+    Redirect::to(url.as_str()).into_response()
 }
 
 /// login callback called by keycloak(idp: github)
@@ -81,15 +91,8 @@ pub async fn callback(
     cookie_manager: CookieManager,
     callback_params: Query<CallbackParams>,
 ) -> impl IntoResponse {
-    debug!("callback!!");
     //init service
     let auth_service = AuthService::new(app_state.clone());
-
-    debug!("parameters:{:?}", callback_params);
-    debug!(
-        "cookie:session_state_id: {}",
-        cookie_manager.get("session_state_id").unwrap()
-    );
 
     // get claims
     let (id_token, access_token, refresh_token) = auth_service
@@ -101,7 +104,7 @@ pub async fn callback(
         )
         .await
         .unwrap();
-    debug!("id_token: {}",id_token);
+    debug!("id_token: {}", id_token);
 
     //remove cookie
     cookie_manager.remove("session_state_id");
@@ -113,8 +116,13 @@ pub async fn callback(
     cookie_manager.set(cookie);
 
     // set fragment to redirect url
-   let mut redirect_url = Url::parse(format!("{}/callback", app_state.config.fe_app_url.clone()).as_str()).unwrap();
-        redirect_url.set_fragment(Some(&format!("id_token={}&access_token={}", id_token, access_token.into_secret())));
+    let mut redirect_url =
+        Url::parse(format!("{}/callback", app_state.config.fe_app_url.clone()).as_str()).unwrap();
+    redirect_url.set_fragment(Some(&format!(
+        "id_token={}&access_token={}",
+        id_token,
+        access_token.into_secret()
+    )));
 
     (Redirect::to(redirect_url.as_str()).into_response(),)
 }
