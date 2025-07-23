@@ -1,12 +1,14 @@
 CREATE TABLE vpns(
   vpn_id UUID NOT NULL,
   vpn_name VARCHAR(20) NOT NULL,
-  owner_user_id CHAR(32),
+  owner_user_id CHAR(32) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 );
 
 COMMENT ON TABLE vpns IS 'VPN';
+
+ALTER TABLE public.vpns ADD CONSTRAINT vpns_users_fk FOREIGN KEY (owner_user_id) REFERENCES users(user_id)ON DELETE CASCADE ON UPDATE CASCADE;
 
 COMMENT ON COLUMN vpns.vpn_id IS 'VPN ID';
 COMMENT ON COLUMN vpns.vpn_name IS 'VPN名';
