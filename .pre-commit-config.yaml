@@ -1,0 +1,15 @@
+repos:
+  - repo: local
+    hooks:
+      - id: cargo-fmt
+        name: cargo fmt
+        entry: cargo fmt
+        language: system
+        files: \.rs$
+        
+      - id: cargo-clippy
+        name: cargo clippy
+        entry: cargo clippy
+        language: system
+        files: \.rs$
+        args: ['--fix', '--allow-dirty', '--allow-staged', '--', '-W', 'unused-imports']
