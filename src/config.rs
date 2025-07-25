@@ -1,7 +1,13 @@
 use log::{debug, info};
 use std::{env, sync::Arc};
-
 use serde::Deserialize;
+use crate::services::servers_service::ServersService;
+
+#[derive(Clone)]
+pub struct AppState {
+    pub config: Arc<Config>,
+    pub server_service: Arc<ServersService>,
+}
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Config {
@@ -31,8 +37,4 @@ impl Config {
 
         config
     }
-}
-#[derive(Clone)]
-pub struct AppState {
-    pub config: Arc<Config>,
 }
