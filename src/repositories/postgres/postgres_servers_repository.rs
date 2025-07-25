@@ -1,7 +1,9 @@
 use async_trait::async_trait;
 use sqlx::PgPool;
 
-use crate::repositories::servers_repository::ServersRepository;
+use crate::{
+    entities::servers::ServerOutline, repositories::servers_repository::ServersRepository,
+};
 
 pub struct PostgresServersRepository {
     pub pg_pool: PgPool,
@@ -15,5 +17,30 @@ impl PostgresServersRepository {
 
 #[async_trait]
 impl ServersRepository for PostgresServersRepository {
-    async fn find_all(&self) {}
+    async fn find_all(&self) -> Result<Vec<ServerOutline>, sqlx::Error> {
+        
+        sqlx::query_as!(
+            ServerOutline,
+            r#"
+                SELECT /* servers.findAll */
+                  s.vpn_id
+                , v.vpn_name 
+                , s.terminal_id 
+                , t.terminal_name 
+                , t.owner_user_id 
+                , s.public_ip 
+                , s.created_at 
+                  FROM servers s
+            INNER JOIN vpns v
+                    ON s.vpn_id = v.vpn_id 
+            INNER JOIN terminals t 
+                    ON s.terminal_id =t.terminal_id 
+            INNER JOIN users u
+                    ON t.owner_user_id = u.user_id
+            ;
+        "#
+        )
+        .fetch_all(&self.pg_pool)
+        .await
+    }
 }

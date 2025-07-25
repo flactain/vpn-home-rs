@@ -35,7 +35,7 @@ async fn main() {
     // application setting
     let pool = PgPoolOptions::new()
         .max_connections(20)
-        .connect("")
+        .connect(config.clone().database_url.as_str())
         .await
         .unwrap();
 
@@ -70,6 +70,6 @@ async fn main() {
         .fallback(handlers::fallback::fallback_handler);
 
     // server up
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3001").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
