@@ -1,0 +1,56 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT /* servers.findAll */\n                  s.vpn_id\n                , v.vpn_name \n                , s.terminal_id \n                , t.terminal_name \n                , t.owner_user_id \n                , s.public_ip \n                , s.created_at \n                  FROM servers s\n            INNER JOIN vpns v\n                    ON s.vpn_id = v.vpn_id \n            INNER JOIN terminals t \n                    ON s.terminal_id =t.terminal_id \n            INNER JOIN users u\n                    ON t.owner_user_id = u.user_id\n            ;\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "vpn_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "vpn_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "terminal_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "terminal_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "owner_user_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "public_ip",
+        "type_info": "Inet"
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "23c220a8dffc6f6f422c21e34e547e84df11fb2c40bf3ee41ce8272f0869256a"
+}

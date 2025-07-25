@@ -2,10 +2,7 @@ use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
 use log::debug;
 use serde_json::json;
 
-use crate::{
-    config::AppState,
-    entities::dto::response_dto::ResponseDto,
-};
+use crate::{config::AppState, entities::dto::response_dto::ResponseDto};
 
 pub async fn search_all_servers(State(state): State<AppState>) -> impl IntoResponse {
     debug!("handler search_all_servers");

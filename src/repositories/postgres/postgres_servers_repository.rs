@@ -18,7 +18,6 @@ impl PostgresServersRepository {
 #[async_trait]
 impl ServersRepository for PostgresServersRepository {
     async fn find_all(&self) -> Result<Vec<ServerOutline>, sqlx::Error> {
-        
         sqlx::query_as!(
             ServerOutline,
             r#"
