@@ -1,9 +1,7 @@
-use std::sync::Arc;
 
 use axum::Router;
-use sqlx::postgres::PgPoolOptions;
 
-use crate::{config::{AppState, Config}, repositories::postgres::postgres_servers_repository::{self, PostgresServersRepository}, routes::servers_router, services::servers_service::ServersService};
+use crate::{config::AppState, routes::servers_router};
 
 
 pub fn routers() ->Router<AppState> {

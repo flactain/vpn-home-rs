@@ -9,7 +9,7 @@ pub struct PostgresServersRepository{
 
 impl PostgresServersRepository {
     pub fn new(pg_pool:PgPool)->Self{
-        PostgresServersRepository { pg_pool: pg_pool }
+        PostgresServersRepository { pg_pool }
     }
 }
 

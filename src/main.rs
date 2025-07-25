@@ -12,9 +12,9 @@ use tower_http::cors::CorsLayer;
 use vpn_server_rs::{
     config::{AppState, Config},
     handlers,
-    repositories::{postgres::postgres_servers_repository::PostgresServersRepository, servers_repository::ServersRepository},
+    repositories::postgres::postgres_servers_repository::PostgresServersRepository,
     routes,
-    services::servers_service::{self, ServersService},
+    services::servers_service::ServersService,
 };
 
 #[tokio::main]

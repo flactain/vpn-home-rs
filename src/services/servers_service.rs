@@ -8,7 +8,7 @@ pub struct ServersService{
 
 impl ServersService{
     pub fn new(servers_repository: Arc<dyn ServersRepository>) -> Self{
-        Self { servers_repository: servers_repository }
+        Self { servers_repository }
     }
     pub fn search_all_servers(&self){
         self.servers_repository.find_all();
