@@ -1,7 +1,7 @@
-use log::{debug, info};
-use std::{env, sync::Arc};
-use serde::Deserialize;
 use crate::services::servers_service::ServersService;
+use log::{debug, info};
+use serde::Deserialize;
+use std::{env, sync::Arc};
 
 #[derive(Clone)]
 pub struct AppState {

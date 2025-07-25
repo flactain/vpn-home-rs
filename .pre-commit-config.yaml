@@ -1,15 +1,8 @@
 repos:
   - repo: local
     hooks:
-      - id: cargo-fmt
-        name: cargo fmt
-        entry: cargo fmt
+      - id: cargo-pre-commit
+        name: cargo fmt clippy
+        entry: ./.pre-commit-clippy.sh
         language: system
-        files: \.rs$
-        
-      - id: cargo-clippy
-        name: cargo clippy
-        entry: cargo clippy
-        language: system
-        files: \.rs$
-        args: ['--fix', '--allow-dirty', '--allow-staged', '--', '-W', 'unused-imports']
+        pass_filenames: false
