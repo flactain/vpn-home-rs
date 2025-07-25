@@ -33,8 +33,7 @@ async fn main() {
     let config = Config::from_env().unwrap();
 
     // application setting
-    let pool = PgPoolOptions::new()
-        .max_connections(20)
+    let pool = PgPoolOptions::new().max_connections(20)
         .connect("")
         .await
         .unwrap();
