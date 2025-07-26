@@ -1,4 +1,4 @@
-use crate::services::servers_service::ServersService;
+use crate::services::{servers_service::ServersService, vpns_service::VpnsService};
 use log::{debug, info};
 use serde::Deserialize;
 use std::{env, sync::Arc};
@@ -7,6 +7,7 @@ use std::{env, sync::Arc};
 pub struct AppState {
     pub config: Arc<Config>,
     pub server_service: Arc<ServersService>,
+    pub vpns_service: Arc<VpnsService>,
 }
 
 #[derive(Debug, Deserialize, Clone)]

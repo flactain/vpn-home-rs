@@ -12,9 +12,12 @@ use tower_http::cors::CorsLayer;
 use vpn_server_rs::{
     config::{AppState, Config},
     handlers,
-    repositories::postgres::postgres_servers_repository::PostgresServersRepository,
+    repositories::postgres::{
+        postgres_servers_repository::PostgresServersRepository,
+        postgres_vpns_repository::PostgresVpnsRepository,
+    },
     routes,
-    services::servers_service::ServersService,
+    services::{servers_service::ServersService, vpns_service::VpnsService},
 };
 
 #[tokio::main]
@@ -39,14 +42,18 @@ async fn main() {
         .await
         .unwrap();
 
-    // DI container
+    // DI container(repository)
     let postgres_servers_repository = PostgresServersRepository::new(pool.clone());
+    let postgres_vpns_repository = PostgresVpnsRepository::new(pool.clone());
+    //DI container (service)
     let servers_service = ServersService::new(Arc::new(postgres_servers_repository));
+    let vpns_service = VpnsService::new(Arc::new(postgres_vpns_repository));
 
     // app state
     let state = AppState {
         config: Arc::new(config),
         server_service: Arc::new(servers_service),
+        vpns_service: Arc::new(vpns_service),
     };
 
     // routing
