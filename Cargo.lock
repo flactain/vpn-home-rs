@@ -2552,6 +2552,7 @@ dependencies = [
  "axum",
  "axum-cookie",
  "axum_session",
+ "base64",
  "chrono",
  "defguard_wireguard_rs",
  "dotenvy",
