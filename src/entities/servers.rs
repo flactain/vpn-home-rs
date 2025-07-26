@@ -9,5 +9,7 @@ pub struct ServerOutline {
     pub terminal_name: String,
     pub owner_user_id: String,
     pub public_ip: IpNet,
+    pub private_ip: IpNet,
     pub created_at: Option<chrono::NaiveDateTime>,
+    pub is_approved: Option<bool>,
 }

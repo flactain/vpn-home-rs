@@ -28,7 +28,9 @@ impl ServersRepository for PostgresServersRepository {
                 , t.terminal_name 
                 , t.owner_user_id 
                 , s.public_ip 
+                , s.private_ip
                 , s.created_at 
+                , v.approved_at IS NOT NULL AS is_approved
                   FROM servers s
             INNER JOIN vpns v
                     ON s.vpn_id = v.vpn_id 

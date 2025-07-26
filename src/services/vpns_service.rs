@@ -2,10 +2,7 @@ use std::sync::Arc;
 
 use log::debug;
 
-use crate::{
-    entities::vpns::VpnOutline,
-    repositories::vpns_repository::VpnsRepository,
-};
+use crate::{entities::vpns::VpnOutline, repositories::vpns_repository::VpnsRepository};
 
 pub struct VpnsService {
     vpns_repository: Arc<dyn VpnsRepository>,

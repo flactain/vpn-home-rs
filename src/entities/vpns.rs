@@ -8,6 +8,8 @@ pub struct VpnOutline {
     pub owner_user_id: String,
     pub server_name: String,
     pub public_ip: IpNet,
+    pub private_ip: IpNet,
     pub clients_count: Option<i64>,
+    pub is_approved: Option<bool>,
     pub created_at: Option<chrono::NaiveDateTime>,
 }

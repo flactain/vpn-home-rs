@@ -8,6 +8,7 @@ CREATE TABLE servers (
     vpn_id uuid NOT NULL, -- VPN ID
     terminal_id uuid NOT NULL, -- 端末ID
     public_ip inet NOT NULL, -- パブリックIP
+    private_ip inet NOT NULL, --プライベートIP
     config_name text NULL, -- configファイル名
     public_key text NOT NULL, -- パブリックキー
     keep_alive_second int4 NULL, -- keep-alive時間
@@ -30,8 +31,10 @@ ALTER TABLE public.servers ADD CONSTRAINT servers_vpns_fk FOREIGN KEY (vpn_id) R
 COMMENT ON COLUMN public.servers.vpn_id IS 'VPN ID';
 COMMENT ON COLUMN public.servers.terminal_id IS '端末ID';
 COMMENT ON COLUMN public.servers.public_ip IS 'パブリックIP';
+COMMENT ON COLUMN public.servers.private_ip IS 'プライベートIP';
 COMMENT ON COLUMN public.servers.config_name IS 'configファイル名';
 COMMENT ON COLUMN public.servers.public_key IS 'パブリックキー';
 COMMENT ON COLUMN public.servers.keep_alive_second IS 'keep-alive時間';
 COMMENT ON COLUMN public.servers.post_up_command IS 'postUpのコマンド';
 COMMENT ON COLUMN public.servers.post_down_command IS 'post_downのコマンド';
+

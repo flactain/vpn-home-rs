@@ -9,6 +9,7 @@ CREATE TABLE clients (
     terminal_id uuid NOT NULL,
     allowed_ip inet NULL,
     public_key text NULL,
+    approved_at timestamp NULL,
     created_at timestamp DEFAULT CURRENT_TIMESTAMP NULL,
     updated_at timestamp DEFAULT CURRENT_TIMESTAMP NULL,
     is_deleted bool DEFAULT false NOT NULL,
@@ -26,3 +27,4 @@ COMMENT ON COLUMN public.clients.vpn_id IS 'VPN ID';
 COMMENT ON COLUMN public.clients.terminal_id IS '端末ID';
 COMMENT ON COLUMN public.clients.allowed_ip IS 'IP';
 COMMENT ON COLUMN public.clients.public_key IS 'パブリックキー';
+COMMENT ON COLUMN public.clients.approved_at IS '承認日時';
