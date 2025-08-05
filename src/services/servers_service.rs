@@ -3,8 +3,7 @@ use std::sync::Arc;
 use log::debug;
 
 use crate::{
-    entities::servers::ServerOutlineDto,
-    repositories::servers_repository::ServersRepository,
+    entities::servers::ServerOutlineDto, repositories::servers_repository::ServersRepository,
 };
 
 pub struct ServersService {
@@ -20,10 +19,7 @@ impl ServersService {
         match self.servers_repository.find_all().await {
             // Ok(server_outlines) => Ok(Some(ServerOutlineDto::from(server_outlines))),
             Ok(server_outlines) => Ok(Some(
-                server_outlines
-                    .iter()
-                    .map(ServerOutlineDto::from)
-                    .collect(),
+                server_outlines.iter().map(ServerOutlineDto::from).collect(),
             )),
             Err(sqlx::Error::RowNotFound) => Ok(None),
             Err(err) => Err(err.into()),
