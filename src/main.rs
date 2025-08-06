@@ -15,11 +15,15 @@ use vpn_server_rs::{
     repositories::postgres::{
         postgres_clients_repository::PostgresClientsRepository,
         postgres_servers_repository::PostgresServersRepository,
+        postgres_terminals_repository::PostgresTerminalsRepository,
         postgres_vpns_repository::PostgresVpnsRepository,
     },
     routes,
     services::{
-        clients_service::ClientsService, servers_service::ServersService, vpns_service::VpnsService,
+        clients_service::ClientsService,
+        servers_service::ServersService,
+        terminals_service::TerminalsService,
+        vpns_service::VpnsService,
     },
 };
 
@@ -49,10 +53,12 @@ async fn main() {
     let postgres_servers_repository = PostgresServersRepository::new(pool.clone());
     let postgres_vpns_repository = PostgresVpnsRepository::new(pool.clone());
     let postgres_clients_repository = PostgresClientsRepository::new(pool.clone());
+    let postgres_terminals_repository = PostgresTerminalsRepository::new(pool.clone());
     //DI container (service)
     let servers_service = ServersService::new(Arc::new(postgres_servers_repository));
     let vpns_service = VpnsService::new(Arc::new(postgres_vpns_repository));
     let clients_service = ClientsService::new(Arc::new(postgres_clients_repository));
+    let terminals_service = TerminalsService::new(Arc::new(postgres_terminals_repository));
 
     // app state
     let state = AppState {
@@ -60,6 +66,7 @@ async fn main() {
         server_service: Arc::new(servers_service),
         vpns_service: Arc::new(vpns_service),
         clients_service: Arc::new(clients_service),
+        terminals_service: Arc::new(terminals_service),
     };
 
     // routing

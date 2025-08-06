@@ -3,20 +3,20 @@ use sqlx::types::{chrono, uuid::Uuid};
 
 #[derive(sqlx::FromRow, Serialize, Deserialize)]
 pub struct TerminalOutline {
-    terminal_id: Uuid,
-    terminal_name: String,
-    os: Option<String>,
-    is_deleted: bool,
-    created_at: Option<chrono::NaiveDateTime>,
-    updated_at: Option<chrono::NaiveDateTime>,
+    pub terminal_id: Uuid,
+    pub terminal_name: String,
+    pub os: Option<String>,
+    pub is_deleted: bool,
+    pub created_at: Option<chrono::NaiveDateTime>,
+    pub updated_at: Option<chrono::NaiveDateTime>,
 }
 
 #[derive(sqlx::FromRow, Serialize, Deserialize, Debug)]
 pub struct TerminalOutlineDto {
-    terminal_id: String,
-    terminal_name: String,
-    os: Option<String>,
-    is_deleted: bool,
-    created_at: Option<chrono::NaiveDateTime>,
-    updated_at: Option<chrono::NaiveDateTime>,
+    pub terminal_id: String,
+    pub terminal_name: String,
+    pub os: Option<String>,
+    pub is_deleted: bool,
+    pub created_at: Option<chrono::NaiveDateTime>,
+    pub updated_at: Option<chrono::NaiveDateTime>,
 }

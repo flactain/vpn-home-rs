@@ -1,5 +1,6 @@
 use crate::services::{
-    clients_service::ClientsService, servers_service::ServersService, vpns_service::VpnsService,
+    clients_service::ClientsService, servers_service::ServersService,
+    terminals_service::TerminalsService, vpns_service::VpnsService,
 };
 use log::{debug, info};
 use serde::Deserialize;
@@ -11,6 +12,7 @@ pub struct AppState {
     pub server_service: Arc<ServersService>,
     pub vpns_service: Arc<VpnsService>,
     pub clients_service: Arc<ClientsService>,
+    pub terminals_service: Arc<TerminalsService>,
 }
 
 #[derive(Debug, Deserialize, Clone)]

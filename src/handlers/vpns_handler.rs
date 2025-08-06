@@ -120,7 +120,7 @@ pub async fn create_clients(
     let client_info: ClientCreate = (&payload).into();
 
     // terminal check
-    if let Some(terminal_info) = payload.terminal_info {}
+    // 上の変換だとだめっぽいなあ
 
     // create clients
     let (status_code, data, message) = match state
