@@ -48,6 +48,39 @@ impl ClientsRepository for PostgresClientsRepository {
         .await
     }
     async fn create(&self, client_outline: ClientOutline) -> sqlx::Result<AnyQueryResult> {
-        Err(sqlx::Error::RowNotFound)
+        let result = sqlx::query(
+            r#"
+        INSERT INTO clients (
+                    vpn_id
+                  , terminal_id
+                  , allowed_ip
+                  , public_key
+                  , approved_at
+                  , created_at
+                  , updated_at
+                  , is_deleted )
+             VALUES ( 
+                    $1
+                  , $2
+                  , $3
+                  , $4
+                  , NULL 
+                  , CURRENT_TIMESTAMP
+                  , CURRENT_TIMESTAMP
+                  , FALSE )
+        ;
+        "#,
+        )
+        .bind(client_outline.vpn_id)
+        .bind(client_outline.terminal_id)
+        .bind(client_outline.allowed_ip)
+        .bind(client_outline.public_key)
+        .execute(&self.pg_pool)
+        .await;
+
+        match result {
+            Ok(result) => Ok(result.into()),
+            Err(err) => Err(err),
+        }
     }
 }

@@ -1,6 +1,6 @@
-
 use ::serde::Serialize;
 use base64::{Engine, prelude::BASE64_URL_SAFE_NO_PAD};
+use serde::Deserialize;
 use sqlx::types::{chrono, ipnet::IpNet, uuid::Uuid};
 
 #[derive(sqlx::FromRow, Serialize)]
@@ -16,7 +16,7 @@ pub struct ClientOutline {
     pub is_approved: Option<bool>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct ClientOutlineDto {
     pub vpn_id: String,
     pub vpn_name: String,

@@ -1,13 +1,30 @@
-use axum::Router;
+use axum::{
+    Router,
+    routing::get,
+};
 
 use crate::{
     config::AppState,
-    routes::{clients_router, servers_router, vpns_router},
+    handlers::{self, vpns_handler},
 };
 
 pub fn routers() -> Router<AppState> {
-    Router::new()
-        .nest("/api/v1/vpn/servers", servers_router::routers())
-        .nest("/api/v1/vpn/clients", clients_router::routers())
-        .nest("/api/v1/vpn/vpns", vpns_router::routers())
+    let api_routes = Router::new()
+        //clients endpoint
+        .route(
+            "/clients",
+            get(handlers::clients_handler::search_clients)
+                .post(handlers::clients_handler::create_clients),
+        )
+        //vpns endpoint
+        .route("/vpns", get(vpns_handler::search_all_vpns))
+        //servers endpoint
+        .route(
+            "/servers",
+            get(handlers::servers_handler::search_all_servers),
+        )
+        //fallback endpoint
+        .fallback(handlers::fallback::fallback_handler);
+
+    Router::new().nest("/api/v1/vpn", api_routes)
 }

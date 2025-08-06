@@ -11,7 +11,6 @@ use sqlx::postgres::PgPoolOptions;
 use tower_http::cors::CorsLayer;
 use vpn_server_rs::{
     config::{AppState, Config},
-    handlers,
     repositories::postgres::{
         postgres_clients_repository::PostgresClientsRepository,
         postgres_servers_repository::PostgresServersRepository,
@@ -19,9 +18,7 @@ use vpn_server_rs::{
     },
     routes,
     services::{
-        clients_service::ClientsService,
-        servers_service::ServersService,
-        vpns_service::VpnsService,
+        clients_service::ClientsService, servers_service::ServersService, vpns_service::VpnsService,
     },
 };
 
@@ -81,8 +78,7 @@ async fn main() {
                 )
                 .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
                 .allow_headers([header::CONTENT_TYPE, header::ACCEPT, header::AUTHORIZATION]),
-        )
-        .fallback(handlers::fallback::fallback_handler);
+        );
 
     // server up
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3001").await.unwrap();

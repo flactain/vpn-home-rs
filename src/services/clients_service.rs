@@ -5,7 +5,7 @@ use log::debug;
 use uuid::Uuid;
 
 use crate::{
-    entities::clients::ClientOutlineDto,
+    entities::clients::{ClientOutline, ClientOutlineDto},
     repositories::clients_repository::ClientsRepository,
 };
 
@@ -27,9 +27,9 @@ impl ClientsService {
         let vpn_id = Uuid::try_from(
             BASE64_URL_SAFE_NO_PAD
                 .decode(vpn_id)
-                .map_err(|e| anyhow::anyhow!("Invalid vpn_id"))?,
+                .map_err(|_| anyhow::anyhow!("Invalid vpn_id"))?,
         )
-        .map_err(|e| anyhow::anyhow!("Invalid vpn_id"))?;
+        .map_err(|_| anyhow::anyhow!("Invalid vpn_id"))?;
         let result = self.clients_repository.find_by_vpn_id(vpn_id).await;
 
         match result {
@@ -38,6 +38,27 @@ impl ClientsService {
             )),
             Err(sqlx::Error::RowNotFound) => Ok(None),
             Err(err) => Err(err.into()),
+        }
+    }
+
+    pub async fn register_client(
+        &self,
+        client_outline: ClientOutline,
+    ) -> Result<(), anyhow::Error> {
+        debug!("services: register_client");
+
+        match self.clients_repository.create(client_outline).await {
+            Ok(result) => {
+                if result.rows_affected() > 0 {
+                    Ok(())
+                } else {
+                    Err(anyhow::anyhow!("failed to join this vpn"))
+                }
+            }
+            Err(err) => {
+                debug!("{}", err);
+                Err(anyhow::anyhow!("failed to join this vpn"))
+            }
         }
     }
 }
