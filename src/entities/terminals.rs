@@ -1,7 +1,7 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sqlx::types::{chrono, uuid::Uuid};
 
-#[derive(sqlx::FromRow, Serialize)]
+#[derive(sqlx::FromRow, Serialize, Deserialize)]
 pub struct TerminalOutline {
     terminal_id: Uuid,
     terminal_name: String,
@@ -11,7 +11,7 @@ pub struct TerminalOutline {
     updated_at: Option<chrono::NaiveDateTime>,
 }
 
-#[derive(sqlx::FromRow, Serialize)]
+#[derive(sqlx::FromRow, Serialize, Deserialize, Debug)]
 pub struct TerminalOutlineDto {
     terminal_id: String,
     terminal_name: String,

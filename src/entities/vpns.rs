@@ -2,7 +2,7 @@ use ::serde::Serialize;
 use base64::{Engine, prelude::BASE64_URL_SAFE_NO_PAD};
 use sqlx::types::{chrono, ipnet::IpNet, uuid::Uuid};
 
-#[derive(sqlx::FromRow, Serialize)]
+#[derive(sqlx::FromRow, Serialize, Debug)]
 pub struct VpnOutline {
     pub vpn_id: Uuid,
     pub vpn_name: String,
@@ -31,7 +31,7 @@ pub struct VpnOutlineDto {
 impl From<&VpnOutline> for VpnOutlineDto {
     fn from(value: &VpnOutline) -> Self {
         VpnOutlineDto {
-            vpn_id: BASE64_URL_SAFE_NO_PAD.encode(value.vpn_id),
+            vpn_id: BASE64_URL_SAFE_NO_PAD.encode(value.vpn_id.as_bytes()),
             vpn_name: value.vpn_name.clone(),
             owner_user_id: value.owner_user_id.clone(),
             server_name: value.server_name.clone(),

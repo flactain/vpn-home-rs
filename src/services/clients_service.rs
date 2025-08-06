@@ -5,7 +5,7 @@ use log::debug;
 use uuid::Uuid;
 
 use crate::{
-    entities::clients::{ClientOutline, ClientOutlineDto},
+    entities::clients::{ClientCreate, ClientOutlineDto},
     repositories::clients_repository::ClientsRepository,
 };
 
@@ -41,13 +41,10 @@ impl ClientsService {
         }
     }
 
-    pub async fn register_client(
-        &self,
-        client_outline: ClientOutline,
-    ) -> Result<(), anyhow::Error> {
+    pub async fn register_client(&self, client_info: ClientCreate) -> Result<(), anyhow::Error> {
         debug!("services: register_client");
 
-        match self.clients_repository.create(client_outline).await {
+        match self.clients_repository.create(client_info).await {
             Ok(result) => {
                 if result.rows_affected() > 0 {
                     Ok(())

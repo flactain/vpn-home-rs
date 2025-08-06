@@ -2,7 +2,8 @@ use async_trait::async_trait;
 use sqlx::{PgPool, any::AnyQueryResult};
 
 use crate::{
-    entities::clients::ClientOutline, repositories::clients_repository::ClientsRepository,
+    entities::clients::{ClientCreate, ClientOutline},
+    repositories::clients_repository::ClientsRepository,
 };
 
 pub struct PostgresClientsRepository {
@@ -47,7 +48,7 @@ impl ClientsRepository for PostgresClientsRepository {
         .fetch_all(&self.pg_pool)
         .await
     }
-    async fn create(&self, client_outline: ClientOutline) -> sqlx::Result<AnyQueryResult> {
+    async fn create(&self, client_info: ClientCreate) -> sqlx::Result<AnyQueryResult> {
         let result = sqlx::query(
             r#"
         INSERT INTO clients (
@@ -71,10 +72,10 @@ impl ClientsRepository for PostgresClientsRepository {
         ;
         "#,
         )
-        .bind(client_outline.vpn_id)
-        .bind(client_outline.terminal_id)
-        .bind(client_outline.allowed_ip)
-        .bind(client_outline.public_key)
+        .bind(client_info.vpn_id)
+        .bind(client_info.terminal_id)
+        .bind(client_info.allowed_ip)
+        .bind(client_info.public_key)
         .execute(&self.pg_pool)
         .await;
 

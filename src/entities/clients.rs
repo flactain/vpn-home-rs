@@ -3,6 +3,9 @@ use base64::{Engine, prelude::BASE64_URL_SAFE_NO_PAD};
 use serde::Deserialize;
 use sqlx::types::{chrono, ipnet::IpNet, uuid::Uuid};
 
+use crate::entities::terminals::TerminalOutlineDto;
+
+// Client概要
 #[derive(sqlx::FromRow, Serialize)]
 pub struct ClientOutline {
     pub vpn_id: Uuid,
@@ -16,6 +19,7 @@ pub struct ClientOutline {
     pub is_approved: Option<bool>,
 }
 
+// Client概要(display)
 #[derive(Serialize, Deserialize)]
 pub struct ClientOutlineDto {
     pub vpn_id: String,
@@ -27,6 +31,45 @@ pub struct ClientOutlineDto {
     pub public_key: Option<String>,
     pub created_at: Option<chrono::NaiveDateTime>,
     pub is_approved: Option<bool>,
+}
+//Client 作成
+#[derive(Serialize, Deserialize)]
+pub struct ClientCreate {
+    pub vpn_id: Uuid,
+    pub terminal_id: Uuid,
+    pub allowed_ip: Option<IpNet>,
+    pub public_key: Option<String>,
+}
+
+//Client 作成Dto
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ClientCreateDto {
+    pub vpn_id: String,
+    pub terminal_id: String,
+    pub allowed_ip: Option<IpNet>,
+    pub public_key: Option<String>,
+    pub terminal_info: Option<TerminalOutlineDto>,
+}
+
+impl From<&ClientCreateDto> for ClientCreate {
+    fn from(client_create_dto: &ClientCreateDto) -> Self {
+        ClientCreate {
+            vpn_id: Uuid::try_from(
+                BASE64_URL_SAFE_NO_PAD
+                    .decode(client_create_dto.vpn_id.clone())
+                    .unwrap(),
+            )
+            .unwrap(),
+            terminal_id: Uuid::try_from(
+                BASE64_URL_SAFE_NO_PAD
+                    .decode(client_create_dto.terminal_id.clone())
+                    .unwrap(),
+            )
+            .unwrap(),
+            allowed_ip: client_create_dto.allowed_ip,
+            public_key: client_create_dto.public_key.clone(),
+        }
+    }
 }
 
 impl From<&ClientOutline> for ClientOutlineDto {

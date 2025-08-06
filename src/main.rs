@@ -6,6 +6,7 @@ use axum::http::{
 };
 use axum_cookie::CookieLayer;
 use axum_session::{SessionConfig, SessionLayer, SessionNullPool, SessionStore};
+use base64::{Engine, prelude::BASE64_URL_SAFE_NO_PAD};
 use log::info;
 use sqlx::postgres::PgPoolOptions;
 use tower_http::cors::CorsLayer;
@@ -79,6 +80,11 @@ async fn main() {
                 .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
                 .allow_headers([header::CONTENT_TYPE, header::ACCEPT, header::AUTHORIZATION]),
         );
+
+    let s = "019841d5-83cb-79bb-83a4-100b6a89561e";
+    let s = uuid::Uuid::parse_str(s).unwrap();
+
+    println!("vpn_id: {}", BASE64_URL_SAFE_NO_PAD.encode(s));
 
     // server up
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3001").await.unwrap();
