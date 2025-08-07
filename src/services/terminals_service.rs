@@ -17,28 +17,24 @@ impl TerminalsService {
         }
     }
 
-    pub async fn create_if_not_exists(
-        &self,
-        terminal_info: TerminalOutline,
-    ) -> Result<(), anyhow::Error> {
-        if self
+    pub async fn exists(&self, terminal_id: uuid::Uuid) -> bool {
+        self
             .terminals_repository
-            .exists_by_id(terminal_info.terminal_id)
+            .exists_by_id(terminal_id)
             .await
             .unwrap()
-        {
-            Ok(())
-        } else {
-            match self.terminals_repository.create(terminal_info).await {
-                Ok(result) => {
-                    if result.rows_affected() > 0 {
-                        Ok(())
-                    } else {
-                        Err(anyhow::anyhow!("cannot register terminal."))
-                    }
+    }
+
+    pub async fn register(&self, terminal_info: TerminalOutline) -> Result<(), anyhow::Error> {
+        match self.terminals_repository.create(terminal_info).await {
+            Ok(result) => {
+                if result.rows_affected() > 0 {
+                    Ok(())
+                } else {
+                    Err(anyhow::anyhow!("cannot register terminal."))
                 }
-                Err(_) => Err(anyhow::anyhow!("something go wrong")),
             }
+            Err(_) => Err(anyhow::anyhow!("something go wrong")),
         }
     }
 }

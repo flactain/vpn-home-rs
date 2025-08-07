@@ -20,10 +20,8 @@ use vpn_server_rs::{
     },
     routes,
     services::{
-        clients_service::ClientsService,
-        servers_service::ServersService,
-        terminals_service::TerminalsService,
-        vpns_service::VpnsService,
+        clients_service::ClientsService, servers_service::ServersService,
+        terminals_service::TerminalsService, vpns_service::VpnsService,
     },
 };
 

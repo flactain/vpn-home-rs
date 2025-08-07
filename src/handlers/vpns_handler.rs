@@ -13,8 +13,9 @@ use serde_json::json;
 use crate::{
     config::AppState,
     entities::{
-        clients::{ClientCreate, ClientCreateDto},
+        clients::{ClientCreateDto, ClientOutline},
         dto::response_dto::ResponseDto,
+        terminals::TerminalOutline,
     },
 };
 
@@ -116,19 +117,42 @@ pub async fn create_clients(
 ) -> impl IntoResponse {
     debug!("handler create_clients");
 
+    let terminals_service = state.clone().terminals_service;
+    let clients_service = state.clone().clients_service;
+
     debug!("{:?}", payload);
-    let client_info: ClientCreate = (&payload).into();
+    let client_info = payload.client_info;
+    let mut client_outline: ClientOutline = (&client_info).into();
+    let terminal_info = payload.terminal_info;
 
     // terminal check
-    // 上の変換だとだめっぽいなあ
+    if let Some(terminal_outline) = terminal_info {
+        let terminal_outline: TerminalOutline = (&terminal_outline).into();
+        if !terminals_service.exists(terminal_outline.terminal_id).await {
+            let new_terminal_id = terminal_outline.terminal_id;
+            terminals_service.register(terminal_outline).await.unwrap();
+            client_outline.set_terminal_id(new_terminal_id);
+        } else {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(ResponseDto {
+                    message: "input terminal already exists".to_string(),
+                    data: json!("".to_string()),
+                }),
+            );
+        }
+    } else if !terminals_service.exists(client_outline.terminal_id).await {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(ResponseDto {
+                message: "input terminal not exists".to_string(),
+                data: json!("".to_string()),
+            }),
+        );
+    }
 
     // create clients
-    let (status_code, data, message) = match state
-        .clone()
-        .clients_service
-        .register_client(client_info)
-        .await
-    {
+    let (status_code, data, message) = match clients_service.register_client(client_outline).await {
         Ok(_) => (StatusCode::CREATED, json!(""), "created".to_string()),
         Err(err) => (
             StatusCode::INTERNAL_SERVER_ERROR,
