@@ -17,6 +17,8 @@ pub fn routers() -> Router<AppState> {
         .route("/vpns", get(vpns_handler::search_all_vpns))
         //servers endpoint
         .route("/servers", get(handlers::vpns_handler::search_all_servers))
+        //terminals endpoint
+        .route("/terminals", get(handlers::vpns_handler::search_terminals))
         //fallback endpoint
         .fallback(handlers::fallback::fallback_handler);
 

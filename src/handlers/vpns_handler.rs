@@ -15,11 +15,12 @@ use crate::{
     entities::{
         clients::{ClientCreateDto, ClientOutline},
         dto::response_dto::ResponseDto,
-        terminals::TerminalOutline,
+        terminals::{TerminalOutline, TerminalOutlineDto},
     },
 };
 
 //vpns
+// /vpns
 pub async fn search_all_vpns(State(state): State<AppState>) -> impl IntoResponse {
     debug!("handler: search_all_vpns");
     let vpns_service = state.clone().vpns_service.clone();
@@ -43,6 +44,7 @@ pub async fn search_all_vpns(State(state): State<AppState>) -> impl IntoResponse
 }
 
 //servers
+// /servers
 pub async fn search_all_servers(State(state): State<AppState>) -> impl IntoResponse {
     debug!("handler search_all_servers");
     let (status_code, data, message) = match state.clone().server_service.search_all_servers().await
@@ -71,6 +73,7 @@ pub async fn search_all_servers(State(state): State<AppState>) -> impl IntoRespo
 }
 
 //clients
+// /clients?vpn_id=:vpn_id
 pub async fn search_clients(
     State(state): State<AppState>,
     Query(query): Query<HashMap<String, String>>,
@@ -111,6 +114,8 @@ pub async fn search_clients(
     )
 }
 
+// post
+// /clients
 pub async fn create_clients(
     State(state): State<AppState>,
     Json(payload): Json<ClientCreateDto>,
@@ -154,6 +159,64 @@ pub async fn create_clients(
     // create clients
     let (status_code, data, message) = match clients_service.register_client(client_outline).await {
         Ok(_) => (StatusCode::CREATED, json!(""), "created".to_string()),
+        Err(err) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            json!(""),
+            err.to_string(),
+        ),
+    };
+
+    (
+        status_code,
+        Json(ResponseDto {
+            message: message.to_string(),
+            data,
+        }),
+    )
+}
+
+// terminals
+// /terminals?owner_user_id=:owner_user_id
+pub async fn search_terminals(
+    State(state): State<AppState>,
+    Query(query): Query<HashMap<String, String>>,
+) -> impl IntoResponse {
+    //validation
+    let owner_user_id = query.get("owner_user_id");
+    let owner_user_id = if let Some(owner_user_id) = owner_user_id {
+        owner_user_id
+    } else {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(ResponseDto {
+                message: "owner not found in parameter".to_string(),
+                data: json!(""),
+            }),
+        );
+    };
+
+    let (status_code, data, message) = match state
+        .clone()
+        .terminals_service
+        .search_by_owner_user_id(owner_user_id)
+        .await
+    {
+        Ok(terminal_outlines) => {
+            if let Some(terminal_outlines) = terminal_outlines {
+                (
+                    StatusCode::OK,
+                    json!(
+                        terminal_outlines
+                            .iter()
+                            .map(TerminalOutlineDto::from)
+                            .collect::<Vec<_>>()
+                    ),
+                    "success".to_string(),
+                )
+            } else {
+                (StatusCode::NOT_FOUND, json!(""), "no data".to_string())
+            }
+        }
         Err(err) => (
             StatusCode::INTERNAL_SERVER_ERROR,
             json!(""),

@@ -43,9 +43,29 @@ impl TerminalsRepository for PostgresTerminalsRepository {
         }
     }
 
-    async fn find_by_id(&self, terminal_id: uuid::Uuid) -> sqlx::Result<Vec<TerminalOutline>> {
-        Err(sqlx::Error::RowNotFound)
+    async fn find_by_user_id(&self, owner_user_id: &str) -> sqlx::Result<Vec<TerminalOutline>> {
+        sqlx::query_as!(
+            TerminalOutline,
+            r#"
+            SELECT /* terminals.find_by_user_id */
+                   terminal_id
+                   , terminal_name
+                   , owner_user_id
+                   , os
+                   , created_at
+                   , updated_at
+              FROM terminals t 
+             WHERE 1=1
+               AND t.owner_user_id = $1
+               AND NOT t.is_deleted
+            ;
+            "#,
+            owner_user_id
+        )
+        .fetch_all(&self.pg_pool)
+        .await
     }
+
     async fn create(
         &self,
         terminal_info: TerminalOutline,

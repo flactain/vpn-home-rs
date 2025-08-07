@@ -1,4 +1,7 @@
-use base64::{Engine, prelude::BASE64_STANDARD_NO_PAD};
+use base64::{
+    Engine,
+    prelude::{BASE64_STANDARD_NO_PAD, BASE64_URL_SAFE_NO_PAD},
+};
 use serde::{Deserialize, Serialize};
 use sqlx::types::{chrono, uuid::Uuid};
 use uuid::ContextV7;
@@ -44,6 +47,19 @@ impl From<&TerminalOutlineDto> for TerminalOutline {
             os: terminal_outline_dto.os.clone(),
             created_at: terminal_outline_dto.created_at,
             updated_at: terminal_outline_dto.updated_at,
+        }
+    }
+}
+
+impl From<&TerminalOutline> for TerminalOutlineDto {
+    fn from(terminal_outline: &TerminalOutline) -> Self {
+        TerminalOutlineDto {
+            terminal_id: BASE64_URL_SAFE_NO_PAD.encode(terminal_outline.terminal_id),
+            terminal_name: Some(terminal_outline.terminal_name.clone()),
+            owner_user_id: terminal_outline.owner_user_id.clone(),
+            os: terminal_outline.os.clone(),
+            created_at: terminal_outline.created_at,
+            updated_at: terminal_outline.updated_at,
         }
     }
 }

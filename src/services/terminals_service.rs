@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
+use log::debug;
 
 use crate::{
-    entities::terminals::TerminalOutline,
-    repositories::terminals_repository::TerminalsRepository,
+    entities::terminals::TerminalOutline, repositories::terminals_repository::TerminalsRepository,
 };
 
 pub struct TerminalsService {
@@ -17,9 +17,25 @@ impl TerminalsService {
         }
     }
 
-    pub async fn exists(&self, terminal_id: uuid::Uuid) -> bool {
-        self
+    pub async fn search_by_owner_user_id(
+        &self,
+        owner_user_id: &str,
+    ) -> Result<Option<Vec<TerminalOutline>>, anyhow::Error> {
+        debug!("services: search_by_owner_user_id");
+
+        match self
             .terminals_repository
+            .find_by_user_id(owner_user_id)
+            .await
+        {
+            Ok(server_outlines) => Ok(Some(server_outlines)),
+            Err(sqlx::Error::RowNotFound) => Ok(None),
+            Err(err) => Err(err.into()),
+        }
+    }
+
+    pub async fn exists(&self, terminal_id: uuid::Uuid) -> bool {
+        self.terminals_repository
             .exists_by_id(terminal_id)
             .await
             .unwrap()
