@@ -1,0 +1,13 @@
+repos:
+  - repo: local
+    hooks:
+      - id: cargo-pre-commit
+        name: cargo fmt clippy
+        entry: ./.pre-commit-clippy.sh
+        language: system
+        pass_filenames: false
+      - id: sqlx-pre-commit
+        name: sql offline build
+        entry: ./.pre-commit-sqlx.sh
+        language: system
+        pass_filenames: false

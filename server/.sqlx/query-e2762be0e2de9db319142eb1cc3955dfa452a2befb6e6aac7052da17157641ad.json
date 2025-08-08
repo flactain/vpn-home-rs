@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT /* terminals.find_by_user_id */\n                   terminal_id\n                   , terminal_name\n                   , owner_user_id\n                   , os\n                   , created_at\n                   , updated_at\n              FROM terminals t \n             WHERE 1=1\n               AND t.owner_user_id = $1\n               AND NOT t.is_deleted\n            ;\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "terminal_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "terminal_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "owner_user_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "os",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 5,
+        "name": "updated_at",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "e2762be0e2de9db319142eb1cc3955dfa452a2befb6e6aac7052da17157641ad"
+}

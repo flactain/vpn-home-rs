@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diagram version="1" name="vpn.erd">
+	<entities>
+		<data-source id="postgres-jdbc-19836315161-18eced6ed64d8c41">
+			<entity id="1" name="clients" fq-name="public.clients" order="0" color-bg="198,70,0" font="Segoe UI:9:0" x="440" y="520">
+				<path name="public"/>
+				<path name="vpn"/>
+			</entity>
+			<entity id="2" name="servers" fq-name="public.servers" order="1" color-bg="198,70,0" font="Segoe UI:9:0" x="120" y="520">
+				<path name="public"/>
+				<path name="vpn"/>
+			</entity>
+			<entity id="3" name="terminals" fq-name="public.terminals" order="2" color-bg="165,29,45" font="Segoe UI:9:0" x="120" y="240">
+				<path name="public"/>
+				<path name="vpn"/>
+			</entity>
+			<entity id="4" name="vpns" fq-name="public.vpns" order="3" color-bg="165,29,45" font="Segoe UI:9:0" x="440" y="240">
+				<path name="public"/>
+				<path name="vpn"/>
+			</entity>
+		</data-source>
+	</entities>
+	<relations>
+		<relation name="clients_terminals_fk" fq-name="public.clients.clients_terminals_fk" type="fk" pk-ref="3" fk-ref="1"/>
+		<relation name="servers_terminals_fk" fq-name="public.servers.servers_terminals_fk" type="fk" pk-ref="3" fk-ref="2"/>
+		<relation name="vpns_clients_fkey" fq-name="public.clients.vpns_clients_fkey" type="fk" pk-ref="4" fk-ref="1"/>
+		<relation name="servers_vpns_fk" fq-name="public.servers.servers_vpns_fk" type="fk" pk-ref="4" fk-ref="2"/>
+	</relations>
+</diagram>
