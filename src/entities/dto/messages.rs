@@ -1,15 +1,29 @@
-
 use chrono::Local;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-struct SqsMessage {
+pub struct SqsMessage {
     message_id: Uuid,
     message_type: MessageType,
     timestamp: chrono::NaiveDateTime,
     alt_id: String,
+}
+
+impl SqsMessage {
+    pub fn message_id(&self) -> Uuid {
+        self.message_id
+    }
+    pub fn message_type(&self) -> MessageType {
+        self.message_type
+    }
+    pub fn timestamp(&self) -> chrono::NaiveDateTime {
+        self.timestamp
+    }
+    pub fn alt_id(&self) -> String {
+        self.alt_id.clone()
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
