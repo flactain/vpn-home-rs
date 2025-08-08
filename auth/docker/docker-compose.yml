@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:21.1.1
+    container_name: keycloak-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      # 一旦H2-db
+      KC_DB: dev-file
+      KC_DB_URL_PATH: /opt/keycloak/data/keycloakdb
+      KC_HTTP_ENABLED: true
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+      KC_PROXY: none
+      KC_LOG_LEVEL: DEBUG
+      # HTTPクライアントの詳細ログを有効化
+      JAVA_OPTS: >-
+        -Djavax.net.debug=ssl,handshake,data
+        -Dorg.apache.http.wire=DEBUG
+        -Dorg.apache.http.headers=DEBUG
+        -Djava.util.logging.config.file=/opt/keycloak/conf/logging.properties
+      # GitHub APIアクセスのタイムアウト設定
+      KC_SPI_CONNECTIONS_HTTP_CLIENT_DEFAULT_CONNECTION_TTL: 60000
+      KC_SPI_CONNECTIONS_HTTP_CLIENT_DEFAULT_MAX_POOLED_PER_ROUTE: 20
+    ports:
+      - "8080:8080"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+      - keycloak_conf:/opt/keycloak/conf
+      - ./custom-logging.properties:/opt/keycloak/conf/logging.properties
+    command: start-dev
+    network_mode: host
+volumes:
+  keycloak_data:
+    driver: local
+  keycloak_conf:
+    driver: local
