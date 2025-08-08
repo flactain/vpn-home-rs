@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use aws_config::{BehaviorVersion, Region};
 use axum::http::{
     HeaderValue, Method,
     header::{self},
@@ -31,14 +32,22 @@ async fn main() {
     env_logger::init();
     info!("start");
 
+    // config setting
+    let config = Config::from_env().unwrap();
+
+    // aws setting
+    let aws_sdk_config = aws_config::defaults(BehaviorVersion::v2025_01_17())
+        .region(Region::new(config.clone().aws_region))
+        .load()
+        .await;
+
+    let sqs_client = aws_sdk_sqs::Client::new(&aws_sdk_config);
+
     //build session store
     let session_config = SessionConfig::default().with_table_name("sessions");
     let session_store = SessionStore::<SessionNullPool>::new(None, session_config)
         .await
         .unwrap();
-
-    // config setting
-    let config = Config::from_env().unwrap();
 
     // application setting
     let pool = PgPoolOptions::new()
@@ -55,7 +64,8 @@ async fn main() {
     //DI container (service)
     let servers_service = ServersService::new(Arc::new(postgres_servers_repository));
     let vpns_service = VpnsService::new(Arc::new(postgres_vpns_repository));
-    let clients_service = ClientsService::new(Arc::new(postgres_clients_repository));
+    let clients_service =
+        ClientsService::new(Arc::new(postgres_clients_repository), Arc::new(sqs_client));
     let terminals_service = TerminalsService::new(Arc::new(postgres_terminals_repository));
 
     // app state

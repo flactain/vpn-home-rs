@@ -9,7 +9,7 @@ use sqlx::types::{chrono, ipnet::IpNet, uuid::Uuid};
 use crate::entities::terminals::TerminalOutlineDto;
 
 // Client概要
-#[derive(sqlx::FromRow, Serialize)]
+#[derive(sqlx::FromRow, Serialize, Clone)]
 pub struct ClientOutline {
     pub vpn_id: Uuid,
     pub vpn_name: Option<String>,

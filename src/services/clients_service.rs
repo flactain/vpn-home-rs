@@ -1,21 +1,32 @@
 use std::sync::Arc;
 
 use base64::{Engine, prelude::BASE64_URL_SAFE_NO_PAD};
-use log::debug;
+use log::{debug, error};
+use serde_json::json;
 use uuid::Uuid;
 
 use crate::{
-    entities::clients::{ClientOutline, ClientOutlineDto},
+    entities::{
+        clients::{ClientOutline, ClientOutlineDto},
+        dto::messages::{MessageType, SqsMessageBuilder},
+    },
     repositories::clients_repository::ClientsRepository,
 };
 
 pub struct ClientsService {
     clients_repository: Arc<dyn ClientsRepository>,
+    sqs_client: Arc<aws_sdk_sqs::Client>,
 }
 
 impl ClientsService {
-    pub fn new(clients_repository: Arc<dyn ClientsRepository>) -> Self {
-        ClientsService { clients_repository }
+    pub fn new(
+        clients_repository: Arc<dyn ClientsRepository>,
+        sqs_client: Arc<aws_sdk_sqs::Client>,
+    ) -> Self {
+        ClientsService {
+            clients_repository,
+            sqs_client,
+        }
     }
 
     pub async fn search_clients(
@@ -41,21 +52,41 @@ impl ClientsService {
         }
     }
 
-    pub async fn register_client(&self, client_info: ClientOutline) -> Result<(), anyhow::Error> {
+    pub async fn register_client(
+        &self,
+        client_info: ClientOutline,
+        queue_url: String,
+    ) -> Result<(), anyhow::Error> {
         debug!("services: register_client");
 
-        match self.clients_repository.create(client_info).await {
+        // create client on database
+        match self.clients_repository.create(client_info.clone()).await {
             Ok(result) => {
                 if result.rows_affected() > 0 {
-                    Ok(())
                 } else {
-                    Err(anyhow::anyhow!("failed to join this vpn"))
+                    return Err(anyhow::anyhow!("failed to join this vpn"));
                 }
             }
             Err(err) => {
-                debug!("{}", err);
-                Err(anyhow::anyhow!("failed to join this vpn"))
+                error!("{}", err);
+                return Err(anyhow::anyhow!("failed to join this vpn"));
             }
         }
+
+        // sqs enqueue
+        debug!("sqs enqueue!");
+        let message = SqsMessageBuilder::new()
+            .set_message_type(MessageType::CreateClient)
+            .set_payload(json!({"terminal_id": client_info.terminal_id}))
+            .build();
+
+        self.sqs_client
+            .send_message()
+            .queue_url(queue_url)
+            .message_body(message.to_string())
+            .send()
+            .await?;
+
+        Ok(())
     }
 }

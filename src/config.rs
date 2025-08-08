@@ -21,6 +21,10 @@ pub struct Config {
     pub be_app_url: String,
     pub be_app_url_api: String,
     pub fe_app_url: String,
+    pub aws_queue_url: String,
+    aws_access_key_id: String,
+    aws_secret_access_key: String,
+    pub aws_region: String,
 }
 
 impl Config {
@@ -35,8 +39,8 @@ impl Config {
             _ => ".env.local",
         };
 
-        let _ = dotenvy::dotenv();
-        let _ = dotenvy::from_path_override(env_file);
+        dotenvy::dotenv().ok();
+        dotenvy::from_path_override(env_file).ok();
 
         let config = envy::from_env::<Config>();
         debug!("road configs are {:?}", config.as_ref().unwrap());

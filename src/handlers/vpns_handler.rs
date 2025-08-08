@@ -7,7 +7,7 @@ use axum::{
     response::IntoResponse,
 };
 
-use log::debug;
+use log::{debug, error};
 use serde_json::json;
 
 use crate::{
@@ -131,8 +131,10 @@ pub async fn create_clients(
     let terminal_info = payload.terminal_info;
 
     // terminal check
+    // 新規端末登録あり
     if let Some(terminal_outline) = terminal_info {
         let terminal_outline: TerminalOutline = (&terminal_outline).into();
+
         if !terminals_service.exists(terminal_outline.terminal_id).await {
             let new_terminal_id = terminal_outline.terminal_id;
             terminals_service.register(terminal_outline).await.unwrap();
@@ -146,6 +148,7 @@ pub async fn create_clients(
                 }),
             );
         }
+    // 新規端末登録なし
     } else if !terminals_service.exists(client_outline.terminal_id).await {
         return (
             StatusCode::BAD_REQUEST,
@@ -157,13 +160,19 @@ pub async fn create_clients(
     }
 
     // create clients
-    let (status_code, data, message) = match clients_service.register_client(client_outline).await {
+    let (status_code, data, message) = match clients_service
+        .register_client(client_outline, state.clone().config.aws_queue_url.clone())
+        .await
+    {
         Ok(_) => (StatusCode::CREATED, json!(""), "created".to_string()),
-        Err(err) => (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            json!(""),
-            err.to_string(),
-        ),
+        Err(err) => {
+            error!("{}", err);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                json!(""),
+                err.to_string(),
+            )
+        }
     };
 
     (
