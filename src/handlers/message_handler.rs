@@ -1,6 +1,10 @@
 use anyhow::anyhow;
+use lettre::Message;
 
-pub async fn createClient() -> anyhow::Result<()>{
-    Err(anyhow!("err"))
+pub async fn create_client() -> anyhow::Result<()>{
+    //TODO:mail
+    // let email = Message::builder()
 
+
+    Ok(())
 }

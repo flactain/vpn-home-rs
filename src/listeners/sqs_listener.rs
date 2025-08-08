@@ -65,7 +65,7 @@ impl SqsListener {
         // match
         // process
         let process_result = match message_body.message_type() {
-            MessageType::CreateClient => handlers::message_handler::createClient().await,
+            MessageType::CreateClient => handlers::message_handler::create_client().await,
             MessageType::Default => {
                 error!("bad message!");
                 Err(anyhow::anyhow!("bad message"))
