@@ -22,8 +22,6 @@ pub struct Config {
     pub be_app_url_api: String,
     pub fe_app_url: String,
     pub aws_queue_url: String,
-    aws_access_key_id: String,
-    aws_secret_access_key: String,
     pub aws_region: String,
 }
 

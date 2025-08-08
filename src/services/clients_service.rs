@@ -2,7 +2,6 @@ use std::sync::Arc;
 
 use base64::{Engine, prelude::BASE64_URL_SAFE_NO_PAD};
 use log::{debug, error};
-use serde_json::json;
 use uuid::Uuid;
 
 use crate::{
@@ -77,7 +76,7 @@ impl ClientsService {
         debug!("sqs enqueue!");
         let message = SqsMessageBuilder::new()
             .set_message_type(MessageType::CreateClient)
-            .set_payload(json!({"terminal_id": client_info.terminal_id}))
+            .set_alt_id(client_info.terminal_id.to_string())
             .build();
 
         self.sqs_client

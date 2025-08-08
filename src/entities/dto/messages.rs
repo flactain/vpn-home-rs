@@ -1,3 +1,4 @@
+
 use chrono::Local;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -8,8 +9,7 @@ struct SqsMessage {
     message_id: Uuid,
     message_type: MessageType,
     timestamp: chrono::NaiveDateTime,
-    #[serde(flatten)]
-    payload: serde_json::Value,
+    alt_id: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
@@ -36,7 +36,7 @@ impl SqsMessageBuilder {
                 message_id: Uuid::new_v7(uuid::Timestamp::now(uuid::ContextV7::new())),
                 message_type: MessageType::Default,
                 timestamp: Local::now().naive_local(),
-                payload: json!(""),
+                alt_id: "".to_string(),
             },
         }
     }
@@ -46,8 +46,8 @@ impl SqsMessageBuilder {
         self.clone()
     }
 
-    pub fn set_payload(&mut self, message_body: serde_json::Value) -> Self {
-        self.sqs_message.payload = message_body;
+    pub fn set_alt_id(&mut self, alt_id: String) -> Self {
+        self.sqs_message.alt_id = alt_id;
         self.clone()
     }
 
