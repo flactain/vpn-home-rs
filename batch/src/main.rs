@@ -1,7 +1,7 @@
 use aws_config::{BehaviorVersion, Region};
 use log::info;
 use tokio::task;
-use vpn_batch_rs::{config::Config, listeners::sqs_listener::SqsListener};
+use vpn_batch::{config::Config, listeners::sqs_listener::SqsListener};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

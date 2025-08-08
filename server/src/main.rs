@@ -11,7 +11,7 @@ use base64::{Engine, prelude::BASE64_URL_SAFE_NO_PAD};
 use log::info;
 use sqlx::postgres::PgPoolOptions;
 use tower_http::cors::CorsLayer;
-use vpn_server_rs::{
+use vpn_server::{
     config::{AppState, Config},
     repositories::postgres::{
         postgres_clients_repository::PostgresClientsRepository,
