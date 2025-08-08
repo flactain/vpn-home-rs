@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use uuid::Uuid;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct SqsMessage {
     message_id: Uuid,
     message_type: MessageType,
@@ -30,6 +30,12 @@ impl SqsMessage {
 pub enum MessageType {
     Default,
     CreateClient,
+}
+
+impl Default for MessageType {
+    fn default() -> Self {
+        Self::Default
+    }
 }
 
 #[derive(Clone)]
