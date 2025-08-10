@@ -1,7 +1,7 @@
-use std::{collections::HashMap, str::FromStr};
+use std::collections::HashMap;
 
 use axum::{
-    extract::{Path, Query, State},
+    extract::{Query, State},
     response::{IntoResponse, Redirect},
 };
 use axum_cookie::{CookieManager, cookie::Cookie};
@@ -45,8 +45,8 @@ pub async fn login(
     );
     let session_state = serde_json::to_string(&session_state).unwrap().clone();
 
-    debug!("session_state_id: {}", session_state_id.to_string());
-    debug!("session_state_value: {}", session_state.to_string());
+    debug!("session_state_id: {}", session_state_id);
+    debug!("session_state_value: {}", session_state);
     session.set(session_state_id.as_str(), session_state);
 
     //add session_state_id to Cookie.

@@ -3,12 +3,12 @@ use std::sync::Arc;
 use base64::{Engine, prelude::BASE64_URL_SAFE_NO_PAD};
 use log::debug;
 use uuid::Uuid;
+use vpn_libs::entities::messages::{MessageType, SqsMessageBuilder};
 
 use crate::{
     entities::{
         clients::{ClientOutline, ClientOutlineDto},
         errors::AppError,
-        messages::{MessageType, SqsMessageBuilder},
     },
     repositories::clients_repository::ClientsRepository,
 };

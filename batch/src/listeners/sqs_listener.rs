@@ -4,7 +4,7 @@ use aws_sdk_sqs::{
 };
 use log::{debug, error};
 use tokio::task;
-use vpn_server_rs::entities::dto::messages::{MessageType, SqsMessage};
+use vpn_libs::entities::messages::{MessageType, SqsMessage};
 
 use crate::handlers;
 

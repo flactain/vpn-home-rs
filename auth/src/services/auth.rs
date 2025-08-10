@@ -1,9 +1,7 @@
-use anyhow::anyhow;
-use axum_cookie::cookie::{Cookie, CookieJar};
 use jsonwebtoken::{EncodingKey, Header};
-use log::{debug, info, warn};
+use log::{debug, warn};
 use serde::{Deserialize, Serialize};
-use std::{any, convert, sync::Arc};
+use std::sync::Arc;
 
 use axum_session::{Session, SessionNullPool};
 use openidconnect::{
@@ -11,7 +9,7 @@ use openidconnect::{
         CoreAuthDisplay, CoreAuthPrompt, CoreAuthenticationFlow, CoreClient, CoreErrorResponseType,
         CoreGenderClaim, CoreJsonWebKey, CoreJweContentEncryptionAlgorithm,
         CoreJwsSigningAlgorithm, CoreProviderMetadata, CoreRevocableToken, CoreTokenType,
-    }, reqwest::{self, Client}, url::Url, AccessToken, AuthorizationCode, ClientId, ClientSecret, CsrfToken, EmptyAdditionalClaims, EmptyExtraTokenFields, EndpointMaybeSet, EndpointNotSet, EndpointSet, IdTokenClaims, IdTokenFields, IssuerUrl, Nonce, NonceVerifier, OAuth2TokenResponse, PkceCodeChallenge, PkceCodeVerifier, RedirectUrl, RefreshToken, RevocationErrorResponseType, StandardErrorResponse, StandardTokenIntrospectionResponse, StandardTokenResponse, TokenResponse
+    }, reqwest::{self, Client}, url::Url, AccessToken, AuthorizationCode, ClientId, ClientSecret, CsrfToken, EmptyAdditionalClaims, EmptyExtraTokenFields, EndpointMaybeSet, EndpointNotSet, EndpointSet, IdTokenClaims, IdTokenFields, IssuerUrl, Nonce, OAuth2TokenResponse, PkceCodeChallenge, PkceCodeVerifier, RedirectUrl, RefreshToken, RevocationErrorResponseType, StandardErrorResponse, StandardTokenIntrospectionResponse, StandardTokenResponse, TokenResponse
 };
 use tokio::sync::OnceCell;
 

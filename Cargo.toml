@@ -2,6 +2,7 @@
 members = [
     "server",
     "batch",
-  "auth"
+  "auth",
+  "libs"
 ]
 resolver = "2"

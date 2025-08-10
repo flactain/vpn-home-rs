@@ -5,4 +5,3 @@ pub mod terminals;
 pub mod vpns;
 pub mod errors;
 pub mod responses;
-pub mod messages;

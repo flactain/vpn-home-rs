@@ -1,9 +1,7 @@
 use std::sync::{Arc, OnceLock};
 
-use aws_config::{BehaviorVersion, Region};
 use log::info;
-use tokio::task;
-use vpn_batch_common_rs::{config::{AppState, Config}, listeners::sqs_listener::SqsListener};
+use vpn_batch::{config::{AppState, Config}, listeners::sqs_listener::SqsListener};
 
 static APP_STATE: OnceLock<Arc<AppState>> = OnceLock::new();
 

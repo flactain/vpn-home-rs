@@ -1,10 +1,5 @@
-use std::fmt::format;
 
-use axum::{
-    Router,
-    http::{StatusCode, Uri},
-};
-use log::warn;
+use axum::Router;
 
 use crate::config::AppState;
 

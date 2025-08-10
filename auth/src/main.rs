@@ -3,13 +3,13 @@ use std::sync::Arc;
 use axum::{
     http::{
         HeaderValue, Method,
-        header::{self, CONTENT_TYPE},
+        header::{self},
     },
     routing::get,
 };
 use axum_cookie::CookieLayer;
 use axum_session::{SessionConfig, SessionLayer, SessionNullPool, SessionStore};
-use log::{info, warn};
+use log::info;
 use tower_http::cors::CorsLayer;
 use vpn_auth::{
     config::{self, AppState},

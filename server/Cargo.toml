@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+vpn-libs = {path="../libs/"}
 tokio = {version = "1", features=["full"]}
 defguard_wireguard_rs = "0.7"
 axum = "0.8"
