@@ -33,7 +33,7 @@ impl TerminalsRepository for PostgresTerminalsRepository {
 
         match result {
             Ok(result_row) => {
-                if let Some(_) = result_row {
+                if result_row.is_some() {
                     Ok(true)
                 } else {
                     Ok(false)

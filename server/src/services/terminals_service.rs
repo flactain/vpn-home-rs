@@ -3,7 +3,8 @@ use std::sync::Arc;
 use log::debug;
 
 use crate::{
-    entities::terminals::TerminalOutline, repositories::terminals_repository::TerminalsRepository,
+    entities::{errors::AppError, terminals::TerminalOutline},
+    repositories::terminals_repository::TerminalsRepository,
 };
 
 pub struct TerminalsService {
@@ -20,7 +21,7 @@ impl TerminalsService {
     pub async fn search_by_owner_user_id(
         &self,
         owner_user_id: &str,
-    ) -> Result<Option<Vec<TerminalOutline>>, anyhow::Error> {
+    ) -> Result<Vec<TerminalOutline>, AppError> {
         debug!("services: search_by_owner_user_id");
 
         match self
@@ -28,8 +29,8 @@ impl TerminalsService {
             .find_by_user_id(owner_user_id)
             .await
         {
-            Ok(server_outlines) => Ok(Some(server_outlines)),
-            Err(sqlx::Error::RowNotFound) => Ok(None),
+            Ok(server_outlines) => Ok(server_outlines),
+            Err(sqlx::Error::RowNotFound) => Err(AppError::NotFound),
             Err(err) => Err(err.into()),
         }
     }
@@ -38,19 +39,19 @@ impl TerminalsService {
         self.terminals_repository
             .exists_by_id(terminal_id)
             .await
-            .unwrap()
+            .is_ok()
     }
 
-    pub async fn register(&self, terminal_info: TerminalOutline) -> Result<(), anyhow::Error> {
+    pub async fn register(&self, terminal_info: TerminalOutline) -> Result<(), AppError> {
         match self.terminals_repository.create(terminal_info).await {
             Ok(result) => {
                 if result.rows_affected() > 0 {
                     Ok(())
                 } else {
-                    Err(anyhow::anyhow!("cannot register terminal."))
+                    Err(anyhow::anyhow!("cannot register terminal.").into())
                 }
             }
-            Err(_) => Err(anyhow::anyhow!("something go wrong")),
+            Err(err) => Err(AppError::DatabaseError(err)),
         }
     }
 }

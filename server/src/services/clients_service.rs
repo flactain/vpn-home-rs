@@ -1,13 +1,14 @@
 use std::sync::Arc;
 
 use base64::{Engine, prelude::BASE64_URL_SAFE_NO_PAD};
-use log::{debug, error};
+use log::debug;
 use uuid::Uuid;
 
 use crate::{
     entities::{
         clients::{ClientOutline, ClientOutlineDto},
-        dto::messages::{MessageType, SqsMessageBuilder},
+        errors::AppError,
+        messages::{MessageType, SqsMessageBuilder},
     },
     repositories::clients_repository::ClientsRepository,
 };
@@ -19,8 +20,7 @@ pub struct ClientsService {
 
 impl ClientsService {
     pub fn new(
-        clients_repository: Arc<dyn ClientsRepository>,
-        sqs_client: Arc<aws_sdk_sqs::Client>,
+        clients_repository: Arc<dyn ClientsRepository>, sqs_client: Arc<aws_sdk_sqs::Client>,
     ) -> Self {
         ClientsService {
             clients_repository,
@@ -28,26 +28,23 @@ impl ClientsService {
         }
     }
 
-    pub async fn search_clients(
-        &self,
-        vpn_id: &str,
-    ) -> Result<Option<Vec<ClientOutlineDto>>, anyhow::Error> {
+    pub async fn search_clients(&self, vpn_id: &str) -> Result<Vec<ClientOutlineDto>, AppError> {
         debug!("services: search_clients");
 
+        // Validation
         let vpn_id = Uuid::try_from(
             BASE64_URL_SAFE_NO_PAD
                 .decode(vpn_id)
-                .map_err(|_| anyhow::anyhow!("Invalid vpn_id"))?,
+                .map_err(|_| AppError::InvalidInput(vpn_id.to_string()))?,
         )
-        .map_err(|_| anyhow::anyhow!("Invalid vpn_id"))?;
+        .map_err(|_| AppError::InvalidInput(vpn_id.to_string()))?;
+
         let result = self.clients_repository.find_by_vpn_id(vpn_id).await;
 
         match result {
-            Ok(client_outlines) => Ok(Some(
-                client_outlines.iter().map(ClientOutlineDto::from).collect(),
-            )),
-            Err(sqlx::Error::RowNotFound) => Ok(None),
-            Err(err) => Err(err.into()),
+            Ok(client_outlines) => Ok(client_outlines.iter().map(ClientOutlineDto::from).collect()),
+            Err(sqlx::Error::RowNotFound) => Err(AppError::NotFound),
+            Err(sqlx_err) => Err(sqlx_err.into()),
         }
     }
 
@@ -55,20 +52,18 @@ impl ClientsService {
         &self,
         client_info: ClientOutline,
         queue_url: String,
-    ) -> Result<(), anyhow::Error> {
+    ) -> Result<(), AppError> {
         debug!("services: register_client");
 
         // create client on database
         match self.clients_repository.create(client_info.clone()).await {
             Ok(result) => {
-                if result.rows_affected() > 0 {
-                } else {
-                    return Err(anyhow::anyhow!("failed to join this vpn"));
+                if result.rows_affected() == 0 {
+                    return Err(anyhow::anyhow!("failed to join this vpn").into());
                 }
             }
             Err(err) => {
-                error!("{}", err);
-                return Err(anyhow::anyhow!("failed to join this vpn"));
+                return Err(AppError::DatabaseError(err));
             }
         }
 
@@ -84,7 +79,8 @@ impl ClientsService {
             .queue_url(queue_url)
             .message_body(message.to_string())
             .send()
-            .await?;
+            .await
+            .map_err(|_| anyhow::anyhow!("Failed to Queue a request."))?;
 
         Ok(())
     }

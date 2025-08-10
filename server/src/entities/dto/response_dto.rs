@@ -1,8 +1,19 @@
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 
 #[derive(Serialize, Deserialize)]
-pub struct ResponseDto {
-    pub message: String,
-    pub data: Value,
+pub struct ResponseDto<T> {
+    message: String,
+    data: T,
+}
+
+impl<T> ResponseDto<T>
+where
+    T: serde::Serialize,
+{
+    pub fn new(message: &str, data: T) -> Self {
+        ResponseDto {
+            message: message.to_string(),
+            data,
+        }
+    }
 }
