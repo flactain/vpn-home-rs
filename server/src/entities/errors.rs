@@ -18,11 +18,8 @@ pub enum AppError {
     #[error["Something Go Wrong"]]
     DatabaseError(#[source] sqlx::Error),
 
-#[error(transparent)]
-    AnyhowError(
-        #[from]
-        anyhow::Error,
-    ),
+    #[error(transparent)]
+    AnyhowError(#[from] anyhow::Error),
 }
 
 impl From<sqlx::Error> for AppError {

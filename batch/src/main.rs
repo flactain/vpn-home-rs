@@ -1,7 +1,10 @@
 use std::sync::{Arc, OnceLock};
 
 use log::info;
-use vpn_batch::{config::{AppState, Config}, listeners::sqs_listener::SqsListener};
+use vpn_batch::{
+    config::{AppState, Config},
+    listeners::sqs_listener::SqsListener,
+};
 
 static APP_STATE: OnceLock<Arc<AppState>> = OnceLock::new();
 
@@ -15,8 +18,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = Config::from_env().unwrap();
 
     // AppState
-    let state = Arc::new(AppState{
-        config: config.clone()
+    let state = Arc::new(AppState {
+        config: config.clone(),
     });
     APP_STATE.set(state).unwrap();
 

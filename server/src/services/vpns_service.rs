@@ -2,7 +2,10 @@ use std::sync::Arc;
 
 use log::debug;
 
-use crate::{entities::{errors::AppError, vpns::VpnOutlineDto}, repositories::vpns_repository::VpnsRepository};
+use crate::{
+    entities::{approvals::ApprovalRequest, errors::AppError, vpns::VpnOutlineDto},
+    repositories::vpns_repository::VpnsRepository,
+};
 
 pub struct VpnsService {
     vpns_repository: Arc<dyn VpnsRepository>,
@@ -20,5 +23,20 @@ impl VpnsService {
             Err(sqlx::Error::RowNotFound) => Err(AppError::NotFound),
             Err(err) => Err(err.into()),
         }
+    }
+
+    pub async fn search_requests(&self, user_id: String) -> Result<Vec<ApprovalRequest>, AppError> {
+        match self.vpns_repository.find_requests(user_id).await {
+            Ok(requests) => Ok(requests),
+            Err(sqlx::Error::RowNotFound) => Err(AppError::NotFound),
+            Err(err) => Err(err.into()),
+        }
+    }
+
+    pub async fn approve_vpn(&self, approval_request: ApprovalRequest) -> Result<(), AppError> {
+        Ok(())
+    }
+    pub async fn approve_client(&self, approval_request: ApprovalRequest) -> Result<(), AppError> {
+        Ok(())
     }
 }

@@ -1,7 +1,10 @@
 use async_trait::async_trait;
-use sqlx::PgPool;
+use sqlx::{PgPool, any::AnyQueryResult};
 
-use crate::{entities::vpns::VpnOutline, repositories::vpns_repository::VpnsRepository};
+use crate::{
+    entities::{approvals::ApprovalRequest, vpns::VpnOutline},
+    repositories::vpns_repository::VpnsRepository,
+};
 
 pub struct PostgresVpnsRepository {
     pub pg_pool: PgPool,
@@ -54,5 +57,99 @@ impl VpnsRepository for PostgresVpnsRepository {
         )
         .fetch_all(&self.pg_pool)
         .await
+    }
+    async fn find_requests(&self, user_id: String) -> Result<Vec<ApprovalRequest>, sqlx::Error> {
+        let rows: Vec<ApprovalRequest> = sqlx::query_as(
+            r#"
+                SELECT /* vpns.find_requests */
+                       'CLIENT' AS resource_type
+                     , 'CREATE' AS resource_handle
+                     , v.vpn_id AS vpn_id
+                     , c.terminal_id AS resource_id
+                     , v.owner_user_id AS asignee_user_id
+                     , t.owner_user_id AS request_user_id
+                     , c.approved_at
+                  FROM clients c 
+            INNER JOIN vpns v 
+                    ON c.vpn_id = v.vpn_id
+            INNER JOIN terminals t 
+                    ON c.terminal_id =t.terminal_id 
+                 WHERE 1=1
+                   AND v.owner_user_id =$1
+                   AND c.approved_at IS NULL
+               AND NOT v.is_deleted 
+               AND NOT c.is_deleted 
+               AND NOT t.is_deleted 
+            
+            UNION ALL
+             
+                SELECT /* vpns.find_requests */
+                       'VPN' AS resource_type
+                     , 'CREATE' AS resource_handle
+                     , v.vpn_id AS vpn_id
+                     , v.vpn_id AS resource_id
+                     , 'flactain' AS asignee_user_id
+                     , v.owner_user_id AS request_user_id
+                     , v.approved_at
+                  FROM vpns v 
+                 WHERE 1=1
+                   AND v.owner_user_id =$1
+                   AND v.approved_at IS NULL
+               AND NOT v.is_deleted 
+        ;
+        "#,
+        )
+        .bind(user_id)
+        .fetch_all(&self.pg_pool)
+        .await?;
+
+        Ok(rows)
+    }
+    async fn approve_vpn(&self, approval_request: ApprovalRequest) -> sqlx::Result<AnyQueryResult> {
+        let result = sqlx::query(
+            r#" 
+            UPDATE clients c
+               SET approved_at = clocktimestamp()
+                 , updated_at = clock_timestamp()
+             WHERE 1=1
+               AND c.vpn_id = $1
+               AND c.terminal_id =$2
+           AND NOT c.is_deleted
+           ;
+           "#,
+        )
+        .bind(approval_request.vpn_id())
+        .bind(approval_request.resource_id())
+        .execute(&self.pg_pool)
+        .await;
+
+        match result {
+            Ok(result) => Ok(result.into()),
+            Err(err) => Err(err),
+        }
+    }
+    async fn approve_client(
+        &self,
+        approval_request: ApprovalRequest,
+    ) -> Result<AnyQueryResult, sqlx::Error> {
+        let result = sqlx::query(
+            r#" 
+            UPDATE vpns v
+               SET approved_at = clocktimestamp()
+                 , updated_at = clock_timestamp()
+             WHERE 1=1
+               AND v.vpn_id = $1
+           AND NOT v.is_deleted 
+           ;
+           "#,
+        )
+        .bind(approval_request.resource_id())
+        .execute(&self.pg_pool)
+        .await;
+
+        match result {
+            Ok(result) => Ok(result.into()),
+            Err(err) => Err(err),
+        }
     }
 }

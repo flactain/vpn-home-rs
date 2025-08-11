@@ -11,8 +11,10 @@ use log::debug;
 use crate::{
     config::AppState,
     entities::{
+        approvals::{ApprovalRequest, ResourceType},
         clients::{ClientCreateDto, ClientOutline},
         errors::AppError,
+        ids::EntityId,
         responses::HttpResponse,
         terminals::TerminalOutline,
     },
@@ -26,6 +28,43 @@ pub async fn search_all_vpns(State(state): State<AppState>) -> impl IntoResponse
     let result = state.vpns_service.search_all_vpns().await;
     match result {
         Ok(data) => HttpResponse::Ok(data).into_response(),
+        Err(err) => err.into_response(),
+    }
+}
+
+pub async fn search_requests(
+    State(state): State<AppState>,
+    Query(query): Query<HashMap<String, String>>,
+) -> impl IntoResponse {
+    debug!("handler: search_request");
+
+    // extract
+    let Some(user_id) = query.get("user_id") else {
+        return AppError::InvalidInput("user_id".to_string()).into_response();
+    };
+
+    // data fetch
+    let result = state.vpns_service.search_requests(user_id.to_owned()).await;
+
+    match result {
+        Ok(approval_requests) => HttpResponse::Ok(approval_requests).into_response(),
+        Err(err) => err.into_response(),
+    }
+}
+
+pub async fn approve_request(
+    State(state): State<AppState>,
+    Json(payload): Json<ApprovalRequest>,
+) -> impl IntoResponse {
+    debug!("{:?}", payload);
+
+    let result = match payload.resource_type() {
+        ResourceType::Vpn => state.vpns_service.approve_vpn(payload).await,
+        ResourceType::Client => state.vpns_service.approve_client(payload).await,
+    };
+
+    match result {
+        Ok(_) => HttpResponse::Created(()).into_response(),
         Err(err) => err.into_response(),
     }
 }
@@ -50,10 +89,19 @@ pub async fn search_clients(
 ) -> impl IntoResponse {
     debug!("handler search_clients");
 
-    let result = state
-        .clients_service
-        .search_clients(query.get("vpn_id").unwrap())
-        .await;
+    // extract
+    let Some(vpn_id) = query.get("vpn_id") else {
+        return AppError::InvalidInput("vpn_id".to_string()).into_response();
+    };
+
+    // transform
+    let vpn_id = match EntityId::try_from(vpn_id.to_owned()) {
+        Ok(vpn_id) => vpn_id,
+        Err(err) => return err.into_response(),
+    };
+
+    // data fetch
+    let result = state.clients_service.search_clients(vpn_id).await;
 
     match result {
         Ok(data) => HttpResponse::Ok(data).into_response(),
@@ -133,7 +181,7 @@ pub async fn search_terminals(
     let owner_user_id = if let Some(owner_user_id) = owner_user_id {
         owner_user_id
     } else {
-        return AppError::NotFound.into_response();
+        return AppError::InvalidInput("owner_user_id".to_string()).into_response();
     };
 
     let result = state

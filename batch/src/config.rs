@@ -3,7 +3,7 @@ use std::env;
 use log::{debug, info};
 use serde::Deserialize;
 #[derive(Debug, Deserialize, Clone)]
-pub struct AppState{
+pub struct AppState {
     pub config: Config,
 }
 

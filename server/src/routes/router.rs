@@ -15,6 +15,10 @@ pub fn routers() -> Router<AppState> {
         )
         //vpns endpoint
         .route("/vpns", get(vpns_handler::search_all_vpns))
+        .route(
+            "/vpns/requests",
+            get(vpns_handler::search_requests).post(vpns_handler::approve_request),
+        )
         //servers endpoint
         .route("/servers", get(handlers::vpns_handler::search_all_servers))
         //terminals endpoint

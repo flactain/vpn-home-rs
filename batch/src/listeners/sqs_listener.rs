@@ -1,7 +1,4 @@
-use aws_sdk_sqs::{
-    operation::receive_message::{ ReceiveMessageOutput},
-    types::Message,
-};
+use aws_sdk_sqs::{operation::receive_message::ReceiveMessageOutput, types::Message};
 use log::{debug, error};
 use tokio::task;
 use vpn_libs::entities::messages::{MessageType, SqsMessage};

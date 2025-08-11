@@ -12,7 +12,7 @@ pub struct SessionState {
     pub csrf_token: CsrfToken,
     pub nonce: Nonce,
     pub pkce_verifier: PkceCodeVerifier,
-    pub exp: i64, 
+    pub exp: i64,
 }
 
 impl SessionState {
@@ -20,7 +20,7 @@ impl SessionState {
         csrf_token: CsrfToken,
         nonce: Nonce,
         pkce_verifier: PkceCodeVerifier,
-        exp: i64 ,
+        exp: i64,
     ) -> Self {
         SessionState {
             csrf_token,

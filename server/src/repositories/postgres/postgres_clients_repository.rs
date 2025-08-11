@@ -2,7 +2,8 @@ use async_trait::async_trait;
 use sqlx::{PgPool, any::AnyQueryResult};
 
 use crate::{
-    entities::clients::ClientOutline, repositories::clients_repository::ClientsRepository,
+    entities::{clients::ClientOutline, ids::EntityId},
+    repositories::clients_repository::ClientsRepository,
 };
 
 pub struct PostgresClientsRepository {
@@ -17,7 +18,7 @@ impl PostgresClientsRepository {
 
 #[async_trait]
 impl ClientsRepository for PostgresClientsRepository {
-    async fn find_by_vpn_id(&self, vpn_id: uuid::Uuid) -> sqlx::Result<Vec<ClientOutline>> {
+    async fn find_by_vpn_id(&self, vpn_id: EntityId) -> sqlx::Result<Vec<ClientOutline>> {
         sqlx::query_as!(
             ClientOutline,
             r#"
@@ -42,7 +43,7 @@ impl ClientsRepository for PostgresClientsRepository {
                 AND NOT t.is_deleted 
              ;
             "#,
-            vpn_id
+            uuid::Uuid::from(vpn_id)
         )
         .fetch_all(&self.pg_pool)
         .await
