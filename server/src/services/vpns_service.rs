@@ -34,9 +34,28 @@ impl VpnsService {
     }
 
     pub async fn approve_vpn(&self, approval_request: ApprovalRequest) -> Result<(), AppError> {
-        Ok(())
+        match self.vpns_repository.approve_vpn(approval_request).await {
+            Ok(result) => {
+                if result.rows_affected() != 0 {
+                    Ok(())
+                } else {
+                    Err(AppError::AnyhowError(anyhow::anyhow!("something go wrong")))
+                }
+            }
+            Err(err) => Err(AppError::DatabaseError(err)),
+        }
     }
+
     pub async fn approve_client(&self, approval_request: ApprovalRequest) -> Result<(), AppError> {
-        Ok(())
+        match self.vpns_repository.approve_client(approval_request).await {
+            Ok(result) => {
+                if result.rows_affected() != 0 {
+                    Ok(())
+                } else {
+                    Err(AppError::AnyhowError(anyhow::anyhow!("something go wrong")))
+                }
+            }
+            Err(err) => Err(AppError::DatabaseError(err)),
+        }
     }
 }
