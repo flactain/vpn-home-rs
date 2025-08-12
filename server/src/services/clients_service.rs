@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use log::debug;
-use vpn_libs::entities::messages::{MessageType, SqsMessageBuilder};
+use vpn_libs::entities::messages::MessageType;
 
 use crate::{
     entities::{
@@ -10,21 +10,22 @@ use crate::{
         ids::EntityId,
     },
     repositories::clients_repository::ClientsRepository,
+    services::message_queue_service::MessageService,
 };
 
 pub struct ClientsService {
     clients_repository: Arc<dyn ClientsRepository>,
-    sqs_client: Arc<aws_sdk_sqs::Client>,
+    message_service: Arc<dyn MessageService>,
 }
 
 impl ClientsService {
     pub fn new(
         clients_repository: Arc<dyn ClientsRepository>,
-        sqs_client: Arc<aws_sdk_sqs::Client>,
+        message_service: Arc<dyn MessageService>,
     ) -> Self {
         ClientsService {
             clients_repository,
-            sqs_client,
+            message_service,
         }
     }
 
@@ -64,19 +65,13 @@ impl ClientsService {
 
         // sqs enqueue
         debug!("sqs enqueue!");
-        let message = SqsMessageBuilder::new()
-            .set_message_type(MessageType::CreateClient)
-            .set_alt_id(client_info.terminal_id.to_string())
-            .build();
 
-        self.sqs_client
-            .send_message()
-            .queue_url(queue_url)
-            .message_body(message.to_string())
-            .send()
+        self
+            .message_service
+            .send(
+                MessageType::CreateClient,
+                EntityId::new(client_info.terminal_id),
+            )
             .await
-            .map_err(|_| anyhow::anyhow!("Failed to Queue a request."))?;
-
-        Ok(())
     }
 }

@@ -64,7 +64,7 @@ pub async fn approve_request(
     };
 
     match result {
-        Ok(_) => HttpResponse::Created(()).into_response(),
+        Ok(_) => HttpResponse::<String>::Updated.into_response(),
         Err(err) => err.into_response(),
     }
 }

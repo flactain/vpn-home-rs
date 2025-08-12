@@ -4,14 +4,14 @@ use serde_json::json;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct SqsMessage {
+pub struct AppMessage {
     message_id: Uuid,
     message_type: MessageType,
     timestamp: chrono::NaiveDateTime,
     alt_id: String,
 }
 
-impl SqsMessage {
+impl AppMessage {
     pub fn message_id(&self) -> Uuid {
         self.message_id
     }
@@ -29,7 +29,10 @@ impl SqsMessage {
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub enum MessageType {
     Default,
+    CreateVpn,
     CreateClient,
+    ApproveClient,
+    ApproveVpn,
 }
 
 impl Default for MessageType {
@@ -39,20 +42,20 @@ impl Default for MessageType {
 }
 
 #[derive(Clone)]
-pub struct SqsMessageBuilder {
-    sqs_message: SqsMessage,
+pub struct MessageBuilder {
+    message: AppMessage,
 }
 
-impl Default for SqsMessageBuilder {
+impl Default for MessageBuilder {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl SqsMessageBuilder {
+impl MessageBuilder {
     pub fn new() -> Self {
-        SqsMessageBuilder {
-            sqs_message: SqsMessage {
+        MessageBuilder {
+            message: AppMessage {
                 message_id: Uuid::new_v7(uuid::Timestamp::now(uuid::ContextV7::new())),
                 message_type: MessageType::Default,
                 timestamp: Local::now().naive_local(),
@@ -62,16 +65,16 @@ impl SqsMessageBuilder {
     }
 
     pub fn set_message_type(&mut self, message_type: MessageType) -> Self {
-        self.sqs_message.message_type = message_type;
+        self.message.message_type = message_type;
         self.clone()
     }
 
     pub fn set_alt_id(&mut self, alt_id: String) -> Self {
-        self.sqs_message.alt_id = alt_id;
+        self.message.alt_id = alt_id;
         self.clone()
     }
 
     pub fn build(&self) -> serde_json::Value {
-        json!(self.clone().sqs_message)
+        json!(self.clone().message)
     }
 }

@@ -39,7 +39,7 @@ impl VpnsService {
                 if result.rows_affected() != 0 {
                     Ok(())
                 } else {
-                    Err(AppError::AnyhowError(anyhow::anyhow!("something go wrong")))
+                    Err(AppError::NotFound)
                 }
             }
             Err(err) => Err(AppError::DatabaseError(err)),
@@ -52,7 +52,7 @@ impl VpnsService {
                 if result.rows_affected() != 0 {
                     Ok(())
                 } else {
-                    Err(AppError::AnyhowError(anyhow::anyhow!("something go wrong")))
+                    Err(AppError::NotFound)
                 }
             }
             Err(err) => Err(AppError::DatabaseError(err)),

@@ -7,6 +7,7 @@ use crate::entities::{dto::response_dto::ResponseDto, errors::AppError};
 pub enum HttpResponse<T> {
     Ok(T),
     Created(T),
+    Updated,
     NotFound(AppError),
     ServerError(AppError),
     InvalidInput(AppError),
@@ -24,6 +25,11 @@ where
             Self::Created(data) => {
                 (StatusCode::CREATED, Json(ResponseDto::new("Created", data))).into_response()
             }
+            Self::Updated => (
+                StatusCode::NO_CONTENT,
+                Json(ResponseDto::new("Success", "")),
+            )
+                .into_response(),
             Self::NotFound(app_error) => (
                 StatusCode::NOT_FOUND,
                 Json(ResponseDto::new(app_error.to_string().as_str(), "")),

@@ -1,10 +1,14 @@
-use base64::{Engine, prelude::BASE64_STANDARD_NO_PAD};
+use std::fmt;
+
+use base64::{Engine, prelude::BASE64_URL_SAFE_NO_PAD};
+use log::debug;
 use serde::{Deserialize, Serialize};
 
 use crate::entities::errors::AppError;
 
 #[derive(sqlx::Type, Deserialize, Serialize, Clone, Debug)]
 #[sqlx(transparent)]
+#[serde(try_from = "String")]
 pub struct EntityId(uuid::Uuid);
 
 impl EntityId {
@@ -17,8 +21,9 @@ impl TryFrom<String> for EntityId {
     type Error = AppError;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
+        debug!("try from string");
         // decode
-        let decoded_value = BASE64_STANDARD_NO_PAD
+        let decoded_value = BASE64_URL_SAFE_NO_PAD
             .decode(value.clone())
             .map_err(|_| AppError::InvalidInput(value.clone()))?;
 
@@ -33,5 +38,11 @@ impl TryFrom<String> for EntityId {
 impl From<EntityId> for uuid::Uuid {
     fn from(value: EntityId) -> Self {
         value.0
+    }
+}
+
+impl fmt::Display for EntityId {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
     }
 }

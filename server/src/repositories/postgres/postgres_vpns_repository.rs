@@ -108,18 +108,17 @@ impl VpnsRepository for PostgresVpnsRepository {
     async fn approve_vpn(&self, approval_request: ApprovalRequest) -> sqlx::Result<AnyQueryResult> {
         let result = sqlx::query(
             r#" 
-            UPDATE clients c
-               SET approved_at = clocktimestamp()
+            UPDATE vpns v
+               SET approved_at = clock_timestamp()
                  , updated_at = clock_timestamp()
              WHERE 1=1
-               AND c.vpn_id = $1
-               AND c.terminal_id =$2
-           AND NOT c.is_deleted
+               AND v.vpn_id = $1
+               AND v.approved_at IS NULL
+           AND NOT v.is_deleted 
            ;
            "#,
         )
         .bind(approval_request.vpn_id())
-        .bind(approval_request.resource_id())
         .execute(&self.pg_pool)
         .await;
 
@@ -134,15 +133,18 @@ impl VpnsRepository for PostgresVpnsRepository {
     ) -> Result<AnyQueryResult, sqlx::Error> {
         let result = sqlx::query(
             r#" 
-            UPDATE vpns v
-               SET approved_at = clocktimestamp()
+            UPDATE clients c
+               SET approved_at = clock_timestamp()
                  , updated_at = clock_timestamp()
              WHERE 1=1
-               AND v.vpn_id = $1
-           AND NOT v.is_deleted 
+               AND c.vpn_id = $1
+               AND c.terminal_id =$2
+               AND c.approved_at IS NULL
+           AND NOT c.is_deleted
            ;
            "#,
         )
+        .bind(approval_request.vpn_id())
         .bind(approval_request.resource_id())
         .execute(&self.pg_pool)
         .await;

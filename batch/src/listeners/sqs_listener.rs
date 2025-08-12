@@ -1,7 +1,7 @@
 use aws_sdk_sqs::{operation::receive_message::ReceiveMessageOutput, types::Message};
 use log::{debug, error};
 use tokio::task;
-use vpn_libs::entities::messages::{MessageType, SqsMessage};
+use vpn_libs::entities::messages::{AppMessage, MessageType};
 
 use crate::handlers;
 
@@ -56,13 +56,16 @@ impl SqsListener {
         // message identify
         let receipt_handle = message.receipt_handle().unwrap();
         let message_id = message.message_id().unwrap();
-        let message_body: SqsMessage =
-            serde_json::from_str(message.body().unwrap()).unwrap_or(SqsMessage::default());
+        let message_body: AppMessage =
+            serde_json::from_str(message.body().unwrap()).unwrap_or(AppMessage::default());
 
         // match
         // process
         let process_result = match message_body.message_type() {
             MessageType::CreateClient => handlers::message_handler::create_client().await,
+            MessageType::CreateVpn => Ok(()),
+            MessageType::ApproveVpn => Ok(()),
+            MessageType::ApproveClient => Ok(()),
             MessageType::Default => {
                 error!("bad message!");
                 Err(anyhow::anyhow!("bad message"))
