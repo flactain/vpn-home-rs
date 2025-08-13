@@ -2,7 +2,8 @@ use async_trait::async_trait;
 use sqlx::{PgPool, any::AnyQueryResult};
 
 use crate::{
-    entities::terminals::TerminalOutline, repositories::terminals_repository::TerminalsRepository,
+    entities::{ids::EntityId, terminals::TerminalOutline},
+    repositories::terminals_repository::TerminalsRepository,
 };
 
 pub struct PostgresTerminalsRepository {
@@ -17,7 +18,7 @@ impl PostgresTerminalsRepository {
 
 #[async_trait]
 impl TerminalsRepository for PostgresTerminalsRepository {
-    async fn exists_by_id(&self, terminal_id: uuid::Uuid) -> sqlx::Result<bool> {
+    async fn exists_by_id(&self, terminal_id: &EntityId) -> sqlx::Result<bool> {
         let result = sqlx::query(
             r#"
         SELECT 1 
@@ -68,7 +69,7 @@ impl TerminalsRepository for PostgresTerminalsRepository {
 
     async fn create(
         &self,
-        terminal_info: TerminalOutline,
+        terminal_info: &TerminalOutline,
     ) -> sqlx::Result<AnyQueryResult, sqlx::Error> {
         let result = sqlx::query(
             r#"
@@ -93,10 +94,10 @@ impl TerminalsRepository for PostgresTerminalsRepository {
         ;
         "#,
         )
-        .bind(terminal_info.terminal_id)
-        .bind(terminal_info.terminal_name)
-        .bind(terminal_info.owner_user_id)
-        .bind(terminal_info.os)
+        .bind(terminal_info.terminal_id.clone())
+        .bind(terminal_info.terminal_name.clone())
+        .bind(terminal_info.owner_user_id.clone())
+        .bind(terminal_info.os.clone())
         .execute(&self.pg_pool)
         .await;
 

@@ -3,7 +3,7 @@ use std::sync::Arc;
 use log::debug;
 
 use crate::{
-    entities::{errors::AppError, terminals::TerminalOutline},
+    entities::{errors::AppError, ids::EntityId, terminals::TerminalOutline},
     repositories::terminals_repository::TerminalsRepository,
 };
 
@@ -35,14 +35,14 @@ impl TerminalsService {
         }
     }
 
-    pub async fn exists(&self, terminal_id: uuid::Uuid) -> bool {
+    pub async fn exists(&self, terminal_id: &EntityId) -> bool {
         self.terminals_repository
             .exists_by_id(terminal_id)
             .await
             .is_ok()
     }
 
-    pub async fn register(&self, terminal_info: TerminalOutline) -> Result<(), AppError> {
+    pub async fn register(&self, terminal_info: &TerminalOutline) -> Result<(), AppError> {
         match self.terminals_repository.create(terminal_info).await {
             Ok(result) => {
                 if result.rows_affected() > 0 {

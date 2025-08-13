@@ -3,7 +3,7 @@ use std::sync::Arc;
 use log::debug;
 
 use crate::{
-    entities::{approvals::ApprovalRequest, errors::AppError, vpns::VpnOutlineDto},
+    entities::{approvals::ApprovalRequest, errors::AppError, vpns::VpnOutline},
     repositories::vpns_repository::VpnsRepository,
 };
 
@@ -16,10 +16,10 @@ impl VpnsService {
         Self { vpns_repository }
     }
 
-    pub async fn search_all_vpns(&self) -> Result<Vec<VpnOutlineDto>, AppError> {
+    pub async fn search_all_vpns(&self) -> Result<Vec<VpnOutline>, AppError> {
         debug!("services: search_all_vpns");
         match self.vpns_repository.find_all().await {
-            Ok(vpn_outlines) => Ok(vpn_outlines.iter().map(VpnOutlineDto::from).collect()),
+            Ok(vpn_outlines) => Ok(vpn_outlines),
             Err(sqlx::Error::RowNotFound) => Err(AppError::NotFound),
             Err(err) => Err(err.into()),
         }

@@ -21,10 +21,8 @@ use vpn_server::{
     },
     routes,
     services::{
-        clients_service::ClientsService,
-        externals::message_sqs_service::SqsMessageService,
-        servers_service::ServersService,
-        terminals_service::TerminalsService,
+        clients_service::ClientsService, externals::message_sqs_service::SqsMessageService,
+        servers_service::ServersService, terminals_service::TerminalsService,
         vpns_service::VpnsService,
     },
 };

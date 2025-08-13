@@ -4,11 +4,7 @@ use log::debug;
 use vpn_libs::entities::messages::MessageType;
 
 use crate::{
-    entities::{
-        clients::{ClientOutline, ClientOutlineDto},
-        errors::AppError,
-        ids::EntityId,
-    },
+    entities::{clients::ClientOutline, errors::AppError, ids::EntityId},
     repositories::clients_repository::ClientsRepository,
     services::message_queue_service::MessageService,
 };
@@ -29,16 +25,13 @@ impl ClientsService {
         }
     }
 
-    pub async fn search_clients(
-        &self,
-        vpn_id: EntityId,
-    ) -> Result<Vec<ClientOutlineDto>, AppError> {
+    pub async fn search_clients(&self, vpn_id: EntityId) -> Result<Vec<ClientOutline>, AppError> {
         debug!("services: search_clients");
 
         let result = self.clients_repository.find_by_vpn_id(vpn_id).await;
 
         match result {
-            Ok(client_outlines) => Ok(client_outlines.iter().map(ClientOutlineDto::from).collect()),
+            Ok(client_outlines) => Ok(client_outlines),
             Err(sqlx::Error::RowNotFound) => Err(AppError::NotFound),
             Err(sqlx_err) => Err(sqlx_err.into()),
         }
@@ -66,12 +59,8 @@ impl ClientsService {
         // sqs enqueue
         debug!("sqs enqueue!");
 
-        self
-            .message_service
-            .send(
-                MessageType::CreateClient,
-                EntityId::new(client_info.terminal_id),
-            )
+        self.message_service
+            .send(MessageType::CreateClient, client_info.terminal_id)
             .await
     }
 }

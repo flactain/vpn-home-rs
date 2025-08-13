@@ -12,12 +12,11 @@ use crate::{
     config::AppState,
     entities::{
         approvals::{ApprovalRequest, ResourceType},
-        clients::{ClientCreateDto, ClientOutline},
         errors::AppError,
         ids::EntityId,
         responses::HttpResponse,
-        terminals::TerminalOutline,
     },
+    handlers::dto::client_create_dto::ClientCreateDto,
 };
 
 //vpns
@@ -118,24 +117,19 @@ pub async fn create_clients(
     debug!("handler create_clients");
     debug!("{:?}", payload);
 
-    let mut client_outline: ClientOutline = (&payload.client_info).into();
-    let terminal_info = payload.terminal_info;
+    let mut client_outline = payload.client_info;
+    let terminal_outline = payload.terminal_info;
 
     // terminal check
     // 新規端末登録あり
-    if let Some(terminal_outline) = terminal_info {
-        let terminal_outline: TerminalOutline = (&terminal_outline).into();
-        let exists_terminal = state
-            .terminals_service
-            .exists(terminal_outline.terminal_id)
-            .await;
+    if let Some(mut terminal_outline) = terminal_outline {
+        if terminal_outline.terminal_id == uuid::Uuid::default().into() {
+            terminal_outline.terminal_id = EntityId::new();
 
-        if !exists_terminal {
-            let new_terminal_id = terminal_outline.terminal_id;
+            let result = state.terminals_service.register(&terminal_outline).await;
 
-            let result = state.terminals_service.register(terminal_outline).await;
             if result.is_ok() {
-                client_outline.set_terminal_id(new_terminal_id);
+                client_outline.terminal_id = terminal_outline.terminal_id;
             } else if let Err(err) = result {
                 return err.into_response();
             }
@@ -148,7 +142,7 @@ pub async fn create_clients(
     } else {
         let exists_terminal = state
             .terminals_service
-            .exists(client_outline.terminal_id)
+            .exists(&client_outline.terminal_id)
             .await;
 
         if !exists_terminal {
@@ -188,6 +182,7 @@ pub async fn search_terminals(
         .terminals_service
         .search_by_owner_user_id(owner_user_id)
         .await;
+
     match result {
         Ok(data) => HttpResponse::Ok(data).into_response(),
         Err(err) => err.into_response(),

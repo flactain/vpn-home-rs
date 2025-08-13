@@ -5,7 +5,7 @@ use log::error;
 use sqlx::{self};
 use thiserror::Error;
 
-use crate::entities::dto::response_dto::ResponseDto;
+use crate::handlers::dto::response_dto::ResponseDto;
 
 #[derive(Error, Debug)]
 pub enum AppError {

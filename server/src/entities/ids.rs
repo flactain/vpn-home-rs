@@ -3,17 +3,37 @@ use std::fmt;
 use base64::{Engine, prelude::BASE64_URL_SAFE_NO_PAD};
 use log::debug;
 use serde::{Deserialize, Serialize};
+use uuid::{ContextV7, Uuid};
 
 use crate::entities::errors::AppError;
 
-#[derive(sqlx::Type, Deserialize, Serialize, Clone, Debug)]
+#[derive(sqlx::Type, Deserialize, Serialize, Clone, Debug, PartialEq)]
 #[sqlx(transparent)]
-#[serde(try_from = "String")]
+#[serde(try_from = "String", into = "String")]
+#[derive(Default)]
 pub struct EntityId(uuid::Uuid);
 
 impl EntityId {
-    pub fn new(value: uuid::Uuid) -> Self {
+    pub fn new() -> Self {
+        EntityId(uuid::Uuid::new_v7(uuid::Timestamp::now(ContextV7::new())))
+    }
+}
+
+impl From<EntityId> for String {
+    fn from(val: EntityId) -> Self {
+        BASE64_URL_SAFE_NO_PAD.encode(val.0)
+    }
+}
+
+impl From<Uuid> for EntityId {
+    fn from(value: Uuid) -> Self {
         EntityId(value)
+    }
+}
+
+impl From<EntityId> for uuid::Uuid {
+    fn from(value: EntityId) -> Self {
+        value.0
     }
 }
 
@@ -32,12 +52,6 @@ impl TryFrom<String> for EntityId {
             .map_err(|_| AppError::InvalidInput(value.clone()))?;
 
         Ok(EntityId(id))
-    }
-}
-
-impl From<EntityId> for uuid::Uuid {
-    fn from(value: EntityId) -> Self {
-        value.0
     }
 }
 
