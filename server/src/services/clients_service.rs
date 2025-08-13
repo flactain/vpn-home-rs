@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use log::debug;
+use sqlx::Transaction;
 use vpn_libs::entities::messages::MessageType;
 
 use crate::{
@@ -39,13 +40,17 @@ impl ClientsService {
 
     pub async fn register_client(
         &self,
+        tx: &mut Transaction<'_, sqlx::Postgres>,
         client_info: ClientOutline,
-        queue_url: String,
     ) -> Result<(), AppError> {
         debug!("services: register_client");
 
         // create client on database
-        match self.clients_repository.create(client_info.clone()).await {
+        match self
+            .clients_repository
+            .create(tx, client_info.clone())
+            .await
+        {
             Ok(result) => {
                 if result.rows_affected() == 0 {
                     return Err(anyhow::anyhow!("failed to join this vpn").into());

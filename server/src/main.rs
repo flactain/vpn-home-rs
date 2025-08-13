@@ -81,6 +81,7 @@ async fn main() {
         vpns_service: Arc::new(vpns_service),
         clients_service: Arc::new(clients_service),
         terminals_service: Arc::new(terminals_service),
+        pool: pool.clone(),
     };
 
     // routing

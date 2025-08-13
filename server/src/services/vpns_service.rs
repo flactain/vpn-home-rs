@@ -25,7 +25,10 @@ impl VpnsService {
         }
     }
 
-    pub async fn search_requests(&self, user_id: String) -> Result<Vec<ApprovalRequest>, AppError> {
+    pub async fn search_requests(
+        &self,
+        user_id: &String,
+    ) -> Result<Vec<ApprovalRequest>, AppError> {
         match self.vpns_repository.find_requests(user_id).await {
             Ok(requests) => Ok(requests),
             Err(sqlx::Error::RowNotFound) => Err(AppError::NotFound),

@@ -43,7 +43,7 @@ pub async fn search_requests(
     };
 
     // data fetch
-    let result = state.vpns_service.search_requests(user_id.to_owned()).await;
+    let result = state.vpns_service.search_requests(user_id).await;
 
     match result {
         Ok(approval_requests) => HttpResponse::Ok(approval_requests).into_response(),
@@ -120,13 +120,17 @@ pub async fn create_clients(
     let mut client_outline = payload.client_info;
     let terminal_outline = payload.terminal_info;
 
+    let mut tx = state.pool.begin().await.unwrap();
     // terminal check
     // 新規端末登録あり
     if let Some(mut terminal_outline) = terminal_outline {
         if terminal_outline.terminal_id == uuid::Uuid::default().into() {
             terminal_outline.terminal_id = EntityId::new();
 
-            let result = state.terminals_service.register(&terminal_outline).await;
+            let result = state
+                .terminals_service
+                .register(&mut tx, &terminal_outline)
+                .await;
 
             if result.is_ok() {
                 client_outline.terminal_id = terminal_outline.terminal_id;
@@ -153,8 +157,10 @@ pub async fn create_clients(
     // create clients
     let result = state
         .clients_service
-        .register_client(client_outline, state.clone().config.aws_queue_url.clone())
+        .register_client(&mut tx, client_outline)
         .await;
+
+    tx.commit().await.unwrap();
 
     match result {
         Ok(_) => HttpResponse::Created(()).into_response(),

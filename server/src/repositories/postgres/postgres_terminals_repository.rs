@@ -1,5 +1,7 @@
+use std::ops::DerefMut;
+
 use async_trait::async_trait;
-use sqlx::{PgPool, any::AnyQueryResult};
+use sqlx::{PgPool, Transaction, any::AnyQueryResult};
 
 use crate::{
     entities::{ids::EntityId, terminals::TerminalOutline},
@@ -69,6 +71,7 @@ impl TerminalsRepository for PostgresTerminalsRepository {
 
     async fn create(
         &self,
+        tx: &mut Transaction<'_, sqlx::Postgres>,
         terminal_info: &TerminalOutline,
     ) -> sqlx::Result<AnyQueryResult, sqlx::Error> {
         let result = sqlx::query(
@@ -98,7 +101,7 @@ impl TerminalsRepository for PostgresTerminalsRepository {
         .bind(terminal_info.terminal_name.clone())
         .bind(terminal_info.owner_user_id.clone())
         .bind(terminal_info.os.clone())
-        .execute(&self.pg_pool)
+        .execute(tx.deref_mut())
         .await;
 
         match result {

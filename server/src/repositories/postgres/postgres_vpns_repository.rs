@@ -58,7 +58,7 @@ impl VpnsRepository for PostgresVpnsRepository {
         .fetch_all(&self.pg_pool)
         .await
     }
-    async fn find_requests(&self, user_id: String) -> Result<Vec<ApprovalRequest>, sqlx::Error> {
+    async fn find_requests(&self, user_id: &String) -> Result<Vec<ApprovalRequest>, sqlx::Error> {
         let rows: Vec<ApprovalRequest> = sqlx::query_as(
             r#"
                 SELECT /* vpns.find_requests */

@@ -1,5 +1,7 @@
+use std::ops::DerefMut;
+
 use async_trait::async_trait;
-use sqlx::{PgPool, any::AnyQueryResult};
+use sqlx::{PgPool, Transaction, any::AnyQueryResult};
 
 use crate::{
     entities::{clients::ClientOutline, ids::EntityId},
@@ -48,7 +50,11 @@ impl ClientsRepository for PostgresClientsRepository {
         .fetch_all(&self.pg_pool)
         .await
     }
-    async fn create(&self, client_info: ClientOutline) -> sqlx::Result<AnyQueryResult> {
+    async fn create(
+        &self,
+        tx: &mut Transaction<'_, sqlx::Postgres>,
+        client_info: ClientOutline,
+    ) -> sqlx::Result<AnyQueryResult> {
         let result = sqlx::query(
             r#"
         INSERT INTO clients (
@@ -76,7 +82,7 @@ impl ClientsRepository for PostgresClientsRepository {
         .bind(client_info.terminal_id)
         .bind(client_info.allowed_ip)
         .bind(client_info.public_key)
-        .execute(&self.pg_pool)
+        .execute(tx.deref_mut())
         .await;
 
         match result {

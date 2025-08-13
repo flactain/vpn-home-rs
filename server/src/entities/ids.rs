@@ -42,16 +42,21 @@ impl TryFrom<String> for EntityId {
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
         debug!("try from string");
-        // decode
-        let decoded_value = BASE64_URL_SAFE_NO_PAD
-            .decode(value.clone())
-            .map_err(|_| AppError::InvalidInput(value.clone()))?;
 
-        // convert to UUID
-        let id = uuid::Uuid::try_from(decoded_value)
-            .map_err(|_| AppError::InvalidInput(value.clone()))?;
+        if value == String::default() {
+            Ok(EntityId::default())
+        } else {
+            // decode
+            let decoded_value = BASE64_URL_SAFE_NO_PAD
+                .decode(value.clone())
+                .map_err(|_| AppError::InvalidInput(value.clone()))?;
 
-        Ok(EntityId(id))
+            // convert to UUID
+            let id = uuid::Uuid::try_from(decoded_value)
+                .map_err(|_| AppError::InvalidInput(value.clone()))?;
+
+            Ok(EntityId(id))
+        }
     }
 }
 

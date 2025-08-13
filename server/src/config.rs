@@ -4,6 +4,7 @@ use crate::services::{
 };
 use log::{debug, info};
 use serde::Deserialize;
+use sqlx::PgPool;
 use std::{env, sync::Arc};
 
 #[derive(Clone)]
@@ -13,6 +14,7 @@ pub struct AppState {
     pub vpns_service: Arc<VpnsService>,
     pub clients_service: Arc<ClientsService>,
     pub terminals_service: Arc<TerminalsService>,
+    pub pool: PgPool,
 }
 
 #[derive(Debug, Deserialize, Clone)]

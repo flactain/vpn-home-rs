@@ -44,14 +44,35 @@ impl IntoResponse for AppError {
                 Json(ResponseDto::new(app_error.to_string().as_str(), "")),
             )
                 .into_response(),
-            Self::DatabaseError(sqlx_error) => {
-                error!("{:?}", sqlx_error);
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Json(ResponseDto::new("Something Go Wrong", "")),
-                )
-                    .into_response()
-            }
+            Self::DatabaseError(sqlx_error) => match sqlx_error {
+                sqlx::Error::Database(err) => {
+                    error!("{:?}", err);
+                    if err.is_check_violation()
+                        || err.is_unique_violation()
+                        || err.is_foreign_key_violation()
+                    {
+                        (
+                            StatusCode::BAD_REQUEST,
+                            Json(ResponseDto::new("Invalid Input", "")),
+                        )
+                            .into_response()
+                    } else {
+                        (
+                            StatusCode::INTERNAL_SERVER_ERROR,
+                            Json(ResponseDto::new("Something Go Wrong", "")),
+                        )
+                            .into_response()
+                    }
+                }
+                _ => {
+                    error!("{:?}", sqlx_error);
+                    (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        Json(ResponseDto::new("Something Go Wrong", "")),
+                    )
+                        .into_response()
+                }
+            },
             Self::AnyhowError(anyhow_error) => {
                 error!("{:?}", anyhow_error);
                 (

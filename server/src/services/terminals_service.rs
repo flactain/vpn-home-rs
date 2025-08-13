@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use log::debug;
+use sqlx::Transaction;
 
 use crate::{
     entities::{errors::AppError, ids::EntityId, terminals::TerminalOutline},
@@ -42,8 +43,12 @@ impl TerminalsService {
             .is_ok()
     }
 
-    pub async fn register(&self, terminal_info: &TerminalOutline) -> Result<(), AppError> {
-        match self.terminals_repository.create(terminal_info).await {
+    pub async fn register(
+        &self,
+        tx: &mut Transaction<'_, sqlx::Postgres>,
+        terminal_info: &TerminalOutline,
+    ) -> Result<(), AppError> {
+        match self.terminals_repository.create(tx, terminal_info).await {
             Ok(result) => {
                 if result.rows_affected() > 0 {
                     Ok(())
