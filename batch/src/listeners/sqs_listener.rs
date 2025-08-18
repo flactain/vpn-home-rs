@@ -3,7 +3,7 @@ use log::{debug, error};
 use tokio::task;
 use vpn_libs::entities::messages::{AppMessage, MessageType};
 
-use crate::handlers;
+use crate::{entities::error::AppError, handlers};
 
 pub struct SqsListener {
     queue_url: String,
@@ -37,22 +37,19 @@ impl SqsListener {
 
     async fn poll(&self) {
         loop {
-            self.receive().await.ok();
+            let receive_messages = self.receive_messages().await.unwrap();
+
+            for message in receive_messages.messages() {
+                debug!("Got the message: {:?}", message);
+                self.process(message)
+                    .await
+                    .map_err(|error| error!("{}", error))
+                    .ok();
+            }
         }
     }
 
-    async fn receive(&self) -> anyhow::Result<()> {
-        let receive_messages = self.receive_messages().await?;
-
-        for message in receive_messages.messages() {
-            debug!("Got the message: {:?}", message);
-            self.process(message).await.ok();
-        }
-
-        Ok(())
-    }
-
-    async fn process(&self, message: &Message) -> anyhow::Result<()> {
+    async fn process(&self, message: &Message) -> Result<(), AppError> {
         // message identify
         let receipt_handle = message.receipt_handle().unwrap();
         let message_id = message.message_id().unwrap();
@@ -62,14 +59,11 @@ impl SqsListener {
         // match
         // process
         let process_result = match message_body.message_type() {
-            MessageType::CreateClient => handlers::message_handler::create_client().await,
-            MessageType::CreateVpn => Ok(()),
+            MessageType::RequestClient => handlers::message_handler::create_client().await,
+            MessageType::RequestVpn => Ok(()),
+            MessageType::ApproveClient => handlers::message_handler::approve_client().await,
             MessageType::ApproveVpn => Ok(()),
-            MessageType::ApproveClient => Ok(()),
-            MessageType::Default => {
-                error!("bad message!");
-                Err(anyhow::anyhow!("bad message"))
-            }
+            MessageType::Default => Err(AppError::InvalidInput(message_body.to_string())),
         };
 
         // handle message

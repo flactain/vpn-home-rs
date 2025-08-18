@@ -65,7 +65,7 @@ impl ClientsService {
         debug!("sqs enqueue!");
 
         self.message_service
-            .send(MessageType::CreateClient, client_info.terminal_id)
+            .send(MessageType::RequestClient, client_info.terminal_id)
             .await
     }
 }

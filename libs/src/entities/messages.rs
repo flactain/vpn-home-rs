@@ -1,3 +1,5 @@
+use core::fmt;
+
 use chrono::Local;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -9,6 +11,16 @@ pub struct AppMessage {
     message_type: MessageType,
     timestamp: chrono::NaiveDateTime,
     alt_id: String,
+}
+
+impl fmt::Display for AppMessage {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "message_id:{}, message_type:{}, timestamp:{}, alt_id:{}",
+            self.message_id, self.message_type, self.timestamp, self.alt_id
+        )
+    }
 }
 
 impl AppMessage {
@@ -29,8 +41,8 @@ impl AppMessage {
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub enum MessageType {
     Default,
-    CreateVpn,
-    CreateClient,
+    RequestVpn,
+    RequestClient,
     ApproveClient,
     ApproveVpn,
 }
@@ -39,6 +51,22 @@ impl Default for MessageType {
     fn default() -> Self {
         Self::Default
     }
+}
+
+impl fmt::Display for MessageType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self)
+    }
+}
+
+#[repr(u32)]
+pub enum MessagePriority {
+    VeryHigh = 100,
+    High = 80,
+    Normal = 60,
+    Low = 40,
+    VeryLow = 20,
+    Unnecesarry = 0,
 }
 
 #[derive(Clone)]

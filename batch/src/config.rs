@@ -10,9 +10,7 @@ pub struct AppState {
 #[derive(Debug, Deserialize, Clone)]
 pub struct Config {
     pub database_url: String,
-    pub be_app_url: String,
-    pub be_app_url_api: String,
-    pub fe_app_url: String,
+    pub wg_conf_dir: String,
     pub aws_queue_url: String,
     pub aws_region: String,
 }
