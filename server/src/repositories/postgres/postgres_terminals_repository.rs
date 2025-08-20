@@ -2,11 +2,9 @@ use std::ops::DerefMut;
 
 use async_trait::async_trait;
 use sqlx::{PgPool, Transaction, any::AnyQueryResult};
+use vpn_libs::entities::{ids::EntityId, terminals::TerminalOutline};
 
-use crate::{
-    entities::{ids::EntityId, terminals::TerminalOutline},
-    repositories::terminals_repository::TerminalsRepository,
-};
+use crate::repositories::terminals_repository::TerminalsRepository;
 
 pub struct PostgresTerminalsRepository {
     pub pg_pool: PgPool,

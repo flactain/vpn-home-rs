@@ -6,7 +6,6 @@ use axum::http::{
     header::{self},
 };
 use axum_cookie::CookieLayer;
-use axum_session::{SessionConfig, SessionLayer, SessionNullPool, SessionStore};
 use base64::{Engine, prelude::BASE64_URL_SAFE_NO_PAD};
 use log::info;
 use sqlx::postgres::PgPoolOptions;
@@ -43,12 +42,6 @@ async fn main() {
         .await;
 
     let sqs_client = aws_sdk_sqs::Client::new(&aws_sdk_config);
-
-    //build session store
-    let session_config = SessionConfig::default().with_table_name("sessions");
-    let session_store = SessionStore::<SessionNullPool>::new(None, session_config)
-        .await
-        .unwrap();
 
     // application setting
     let pool = PgPoolOptions::new()
@@ -88,7 +81,6 @@ async fn main() {
     let app = routes::router::routers()
         .with_state(state.clone())
         .layer(CookieLayer::default())
-        .layer(SessionLayer::new(session_store))
         .layer(
             CorsLayer::new()
                 .allow_origin(

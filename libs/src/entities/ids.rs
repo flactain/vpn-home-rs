@@ -1,7 +1,6 @@
 use std::fmt;
 
 use base64::{Engine, prelude::BASE64_URL_SAFE_NO_PAD};
-use log::debug;
 use serde::{Deserialize, Serialize};
 use uuid::{ContextV7, Uuid};
 
@@ -41,8 +40,6 @@ impl TryFrom<String> for EntityId {
     type Error = AppError;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
-        debug!("try from string");
-
         if value == String::default() {
             Ok(EntityId::default())
         } else {

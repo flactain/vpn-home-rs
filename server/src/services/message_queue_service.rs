@@ -1,7 +1,5 @@
 use async_trait::async_trait;
-use vpn_libs::entities::messages::MessageType;
-
-use crate::entities::{errors::AppError, ids::EntityId};
+use vpn_libs::entities::{errors::AppError, ids::EntityId, messages::MessageType};
 
 #[async_trait]
 pub trait MessageService: Send + Sync {

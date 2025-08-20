@@ -1,11 +1,9 @@
 use std::sync::Arc;
 
 use log::debug;
+use vpn_libs::entities::{errors::AppError, servers::ServerEntity};
 
-use crate::{
-    entities::{errors::AppError, servers::ServerEntity},
-    repositories::servers_repository::ServersRepository,
-};
+use crate::repositories::servers_repository::ServersRepository;
 
 pub struct ServersService {
     servers_repository: Arc<dyn ServersRepository>,

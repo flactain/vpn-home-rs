@@ -1,7 +1,8 @@
 use async_trait::async_trait;
 use sqlx::PgPool;
+use vpn_libs::entities::servers::ServerEntity;
 
-use crate::{entities::servers::ServerEntity, repositories::servers_repository::ServersRepository};
+use crate::repositories::servers_repository::ServersRepository;
 
 pub struct PostgresServersRepository {
     pub pg_pool: PgPool,

@@ -12,10 +12,7 @@ impl HostConverter {
             prvkey: host_config.private_key.unwrap(),
             addresses,
             port: (host_config.port),
-            peers: peer_configs
-                .iter()
-                .map(Peer::from)
-                .collect(),
+            peers: peer_configs.iter().map(Peer::from).collect(),
             mtu: None,
         }
     }

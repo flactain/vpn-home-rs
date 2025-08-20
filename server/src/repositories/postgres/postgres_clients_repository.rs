@@ -2,11 +2,9 @@ use std::ops::DerefMut;
 
 use async_trait::async_trait;
 use sqlx::{PgPool, Transaction, any::AnyQueryResult};
+use vpn_libs::entities::{clients::ClientOutline, ids::EntityId};
 
-use crate::{
-    entities::{clients::ClientOutline, ids::EntityId},
-    repositories::clients_repository::ClientsRepository,
-};
+use crate::repositories::clients_repository::ClientsRepository;
 
 pub struct PostgresClientsRepository {
     pub pg_pool: PgPool,

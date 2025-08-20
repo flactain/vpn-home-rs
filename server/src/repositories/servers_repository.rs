@@ -1,6 +1,5 @@
 use async_trait::async_trait;
-
-use crate::entities::servers::ServerEntity;
+use vpn_libs::entities::servers::ServerEntity;
 
 #[async_trait]
 pub trait ServersRepository: Send + Sync {

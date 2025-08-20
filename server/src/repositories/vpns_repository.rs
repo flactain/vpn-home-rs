@@ -1,7 +1,8 @@
 use async_trait::async_trait;
 use sqlx::any::AnyQueryResult;
+use vpn_libs::entities::vpns::VpnOutline;
 
-use crate::entities::{approvals::ApprovalRequest, vpns::VpnOutline};
+use crate::entities::approvals::ApprovalRequest;
 
 #[async_trait]
 pub trait VpnsRepository: Send + Sync {

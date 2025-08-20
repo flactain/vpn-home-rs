@@ -1,7 +1,7 @@
 use axum::{Json, http::StatusCode, response::IntoResponse};
 use log::error;
 
-use crate::{entities::errors::AppError, handlers::dto::response_dto::ResponseDto};
+use crate::{dtos::response_dto::ResponseDto, entities::errors::AppError};
 
 #[derive(Debug)]
 pub enum HttpResponse<T> {

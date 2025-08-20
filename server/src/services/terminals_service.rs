@@ -2,11 +2,9 @@ use std::sync::Arc;
 
 use log::debug;
 use sqlx::Transaction;
+use vpn_libs::entities::{errors::AppError, ids::EntityId, terminals::TerminalOutline};
 
-use crate::{
-    entities::{errors::AppError, ids::EntityId, terminals::TerminalOutline},
-    repositories::terminals_repository::TerminalsRepository,
-};
+use crate::repositories::terminals_repository::TerminalsRepository;
 
 pub struct TerminalsService {
     terminals_repository: Arc<dyn TerminalsRepository>,

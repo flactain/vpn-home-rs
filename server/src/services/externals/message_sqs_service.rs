@@ -2,12 +2,13 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use log::debug;
-use vpn_libs::entities::messages::{MessageBuilder, MessageType};
-
-use crate::{
-    entities::{errors::AppError, ids::EntityId},
-    services::message_queue_service::MessageService,
+use vpn_libs::entities::{
+    errors::AppError,
+    ids::EntityId,
+    messages::{MessageBuilder, MessageType},
 };
+
+use crate::services::message_queue_service::MessageService;
 
 pub struct SqsMessageService {
     sqs_client: Arc<aws_sdk_sqs::Client>,
@@ -24,8 +25,8 @@ impl SqsMessageService {
 
     pub fn get_queue_url(&self, message_type: MessageType) -> String {
         match message_type {
-            MessageType::CreateVpn => self.general_queue_url.clone(),
-            MessageType::CreateClient => self.general_queue_url.clone(),
+            MessageType::RequestVpn => self.general_queue_url.clone(),
+            MessageType::RequestClient => self.general_queue_url.clone(),
             MessageType::ApproveVpn => self.general_queue_url.clone(),
             MessageType::ApproveClient => self.general_queue_url.clone(),
             MessageType::Default => self.general_queue_url.clone(),

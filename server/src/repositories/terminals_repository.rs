@@ -1,7 +1,6 @@
 use async_trait::async_trait;
 use sqlx::{Transaction, any::AnyQueryResult};
-
-use crate::entities::{ids::EntityId, terminals::TerminalOutline};
+use vpn_libs::entities::{ids::EntityId, terminals::TerminalOutline};
 
 #[async_trait]
 pub trait TerminalsRepository: Send + Sync {

@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
-
-use crate::entities::ids::EntityId;
+use vpn_libs::entities::ids::EntityId;
 
 #[derive(sqlx::Type, Deserialize, Serialize, Clone, Debug)]
 #[sqlx(type_name = "TEXT", rename_all = "UPPERCASE")]

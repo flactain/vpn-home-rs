@@ -1,11 +1,9 @@
 use std::sync::Arc;
 
 use log::debug;
+use vpn_libs::entities::{errors::AppError, vpns::VpnOutline};
 
-use crate::{
-    entities::{approvals::ApprovalRequest, errors::AppError, vpns::VpnOutline},
-    repositories::vpns_repository::VpnsRepository,
-};
+use crate::{entities::approvals::ApprovalRequest, repositories::vpns_repository::VpnsRepository};
 
 pub struct VpnsService {
     vpns_repository: Arc<dyn VpnsRepository>,

@@ -4110,9 +4110,15 @@ dependencies = [
 name = "vpn-libs"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
+ "axum",
+ "base64 0.22.1",
  "chrono",
+ "log",
  "serde",
  "serde_json",
+ "sqlx",
+ "thiserror 2.0.15",
  "uuid",
 ]
 
@@ -4126,10 +4132,8 @@ dependencies = [
  "aws-sdk-sqs",
  "axum",
  "axum-cookie",
- "axum_session",
  "base64 0.22.1",
  "chrono",
- "defguard_wireguard_rs",
  "dotenvy",
  "env_logger",
  "envy",

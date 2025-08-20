@@ -2,10 +2,11 @@ use std::sync::Arc;
 
 use log::debug;
 use sqlx::Transaction;
-use vpn_libs::entities::messages::MessageType;
+use vpn_libs::entities::{
+    clients::ClientOutline, errors::AppError, ids::EntityId, messages::MessageType,
+};
 
 use crate::{
-    entities::{clients::ClientOutline, errors::AppError, ids::EntityId},
     repositories::clients_repository::ClientsRepository,
     services::message_queue_service::MessageService,
 };

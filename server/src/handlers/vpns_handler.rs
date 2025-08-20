@@ -7,15 +7,11 @@ use axum::{
 };
 
 use log::debug;
+use vpn_libs::entities::{errors::AppError, ids::EntityId, responses::HttpResponse};
 
 use crate::{
     config::AppState,
-    entities::{
-        approvals::{ApprovalRequest, ResourceType},
-        errors::AppError,
-        ids::EntityId,
-        responses::HttpResponse,
-    },
+    entities::approvals::{ApprovalRequest, ResourceType},
     handlers::dto::client_create_dto::ClientCreateDto,
 };
 

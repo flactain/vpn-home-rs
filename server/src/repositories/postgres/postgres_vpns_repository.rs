@@ -1,10 +1,8 @@
 use async_trait::async_trait;
 use sqlx::{PgPool, any::AnyQueryResult};
+use vpn_libs::entities::vpns::VpnOutline;
 
-use crate::{
-    entities::{approvals::ApprovalRequest, vpns::VpnOutline},
-    repositories::vpns_repository::VpnsRepository,
-};
+use crate::{entities::approvals::ApprovalRequest, repositories::vpns_repository::VpnsRepository};
 
 pub struct PostgresVpnsRepository {
     pub pg_pool: PgPool,
