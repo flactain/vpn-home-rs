@@ -7,7 +7,7 @@ use vpn_libs::entities::{
 };
 
 use crate::{
-    repositories::clients_repository::ClientsRepository,
+    entities::approvals::ApprovalRequest, repositories::clients_repository::ClientsRepository,
     services::message_queue_service::MessageService,
 };
 
@@ -62,11 +62,34 @@ impl ClientsService {
             }
         }
 
+        Ok(())
+
         // sqs enqueue
-        debug!("sqs enqueue!");
+        // debug!("sqs enqueue!");
+
+        // self.message_service
+        //     .send(
+        //         MessageType::RequestClient,
+        //         serde_json::to_string(&client_info).unwrap(),
+        //     )
+        //     .await
+    }
+    pub async fn approve_client(&self, approval_request: ApprovalRequest) -> Result<(), AppError> {
+        let client = match self
+            .clients_repository
+            .find_one(&approval_request.vpn_id, &approval_request.resource_id)
+            .await
+        {
+            Ok(client) => Ok(client),
+            Err(sqlx::Error::RowNotFound) => Err(AppError::NotFound),
+            Err(err) => Err(AppError::DatabaseError(err)),
+        }?;
 
         self.message_service
-            .send(MessageType::RequestClient, client_info.terminal_id)
+            .send(
+                MessageType::ApproveClient,
+                serde_json::to_string(&client).unwrap(),
+            )
             .await
     }
 }

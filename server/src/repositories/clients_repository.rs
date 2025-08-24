@@ -5,6 +5,11 @@ use vpn_libs::entities::{clients::ClientOutline, ids::EntityId};
 #[async_trait]
 pub trait ClientsRepository: Send + Sync {
     async fn find_by_vpn_id(&self, vpn_id: EntityId) -> sqlx::Result<Vec<ClientOutline>>;
+    async fn find_one(
+        &self,
+        vpn_id: &EntityId,
+        terminal_id: &EntityId,
+    ) -> sqlx::Result<ClientOutline>;
     async fn create(
         &self,
         tx: &mut Transaction<'_, sqlx::Postgres>,

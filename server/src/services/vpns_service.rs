@@ -1,17 +1,26 @@
 use std::sync::Arc;
 
 use log::debug;
-use vpn_libs::entities::{errors::AppError, vpns::VpnOutline};
+use vpn_libs::entities::{errors::AppError, messages::MessageType, vpns::VpnOutline};
 
-use crate::{entities::approvals::ApprovalRequest, repositories::vpns_repository::VpnsRepository};
-
+use crate::{
+    entities::approvals::ApprovalRequest, repositories::vpns_repository::VpnsRepository,
+    services::message_queue_service::MessageService,
+};
 pub struct VpnsService {
     vpns_repository: Arc<dyn VpnsRepository>,
+    message_service: Arc<dyn MessageService>,
 }
 
 impl VpnsService {
-    pub fn new(vpns_repository: Arc<dyn VpnsRepository>) -> Self {
-        Self { vpns_repository }
+    pub fn new(
+        vpns_repository: Arc<dyn VpnsRepository>,
+        message_service: Arc<dyn MessageService>,
+    ) -> Self {
+        Self {
+            vpns_repository,
+            message_service,
+        }
     }
 
     pub async fn search_all_vpns(&self) -> Result<Vec<VpnOutline>, AppError> {
@@ -35,28 +44,25 @@ impl VpnsService {
     }
 
     pub async fn approve_vpn(&self, approval_request: ApprovalRequest) -> Result<(), AppError> {
-        match self.vpns_repository.approve_vpn(approval_request).await {
-            Ok(result) => {
-                if result.rows_affected() != 0 {
-                    Ok(())
-                } else {
-                    Err(AppError::NotFound)
-                }
-            }
+        // check existing
+        let vpn = match self
+            .vpns_repository
+            .find_one(&approval_request.vpn_id)
+            .await
+        {
+            Ok(vpn) => Ok(vpn),
+            Err(sqlx::Error::RowNotFound) => Err(AppError::NotFound),
             Err(err) => Err(AppError::DatabaseError(err)),
-        }
-    }
+        }?;
 
-    pub async fn approve_client(&self, approval_request: ApprovalRequest) -> Result<(), AppError> {
-        match self.vpns_repository.approve_client(approval_request).await {
-            Ok(result) => {
-                if result.rows_affected() != 0 {
-                    Ok(())
-                } else {
-                    Err(AppError::NotFound)
-                }
-            }
-            Err(err) => Err(AppError::DatabaseError(err)),
-        }
+        //sqs enqueue
+        debug!("vpn sqs approval enqueue");
+
+        self.message_service
+            .send(
+                MessageType::ApproveVpn,
+                serde_json::to_string(&vpn).unwrap(),
+            )
+            .await
     }
 }

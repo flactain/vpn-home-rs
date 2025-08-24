@@ -1,10 +1,16 @@
-use std::env;
+use std::{
+    env,
+    sync::{Arc, OnceLock},
+};
 
 use log::{debug, info};
 use serde::Deserialize;
-#[derive(Debug, Deserialize, Clone)]
+use sqlx::PgPool;
+
+#[derive(Debug, Clone)]
 pub struct AppState {
     pub config: Config,
+    pub pg_pool: PgPool,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -14,7 +20,16 @@ pub struct Config {
     pub aws_queue_url: String,
     pub aws_region: String,
 }
+pub static APP_STATE: OnceLock<Arc<AppState>> = OnceLock::new();
+
 impl Config {
+    pub fn get_app_state() -> &'static Arc<AppState> {
+        APP_STATE.get().unwrap()
+    }
+    pub fn init_app_state(app_state: Arc<AppState>) -> Result<(), Arc<AppState>> {
+        APP_STATE.set(app_state)
+    }
+
     pub fn from_env() -> Result<Config, envy::Error> {
         let env_name = env::var("RUST_ENV").unwrap_or("local".to_string());
         info!("enviroment: {}", env_name);

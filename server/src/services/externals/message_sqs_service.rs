@@ -1,12 +1,9 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
+use aws_sdk_sqs::types::MessageAttributeValue;
 use log::debug;
-use vpn_libs::entities::{
-    errors::AppError,
-    ids::EntityId,
-    messages::{MessageBuilder, MessageType},
-};
+use vpn_libs::entities::{errors::AppError, messages::MessageType};
 
 use crate::services::message_queue_service::MessageService;
 
@@ -36,17 +33,19 @@ impl SqsMessageService {
 
 #[async_trait]
 impl MessageService for SqsMessageService {
-    async fn send(&self, message_type: MessageType, alt_id: EntityId) -> Result<(), AppError> {
+    async fn send(&self, message_type: MessageType, message_body: String) -> Result<(), AppError> {
         debug!("sqs enqueue!");
-        let message = MessageBuilder::new()
-            .set_message_type(message_type)
-            .set_alt_id(alt_id.to_string())
-            .build();
+        let message_attribute = MessageAttributeValue::builder()
+            .data_type("String")
+            .string_value(message_type.to_string())
+            .build()
+            .map_err(|_| anyhow::anyhow!("Failed to set MessageType of Request"))?;
 
         self.sqs_client
             .send_message()
             .queue_url(self.get_queue_url(message_type))
-            .message_body(message.to_string())
+            .message_body(message_body)
+            .message_attributes("message_type", message_attribute)
             .send()
             .await
             .map_err(|_| anyhow::anyhow!("Failed to Queue a request."))?;

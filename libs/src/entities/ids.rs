@@ -36,6 +36,11 @@ impl From<EntityId> for uuid::Uuid {
     }
 }
 
+impl From<&EntityId> for uuid::Uuid {
+    fn from(value: &EntityId) -> Self {
+        value.0
+    }
+}
 impl TryFrom<String> for EntityId {
     type Error = AppError;
 

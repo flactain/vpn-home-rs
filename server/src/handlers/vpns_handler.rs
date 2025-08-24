@@ -53,9 +53,10 @@ pub async fn approve_request(
 ) -> impl IntoResponse {
     debug!("{:?}", payload);
 
-    let result = match payload.resource_type() {
+    // TODO: implment other request type
+    let result = match payload.resource_type {
         ResourceType::Vpn => state.vpns_service.approve_vpn(payload).await,
-        ResourceType::Client => state.vpns_service.approve_client(payload).await,
+        ResourceType::Client => state.clients_service.approve_client(payload).await,
     };
 
     match result {

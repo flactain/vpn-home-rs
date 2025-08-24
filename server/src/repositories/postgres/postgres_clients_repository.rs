@@ -48,6 +48,46 @@ impl ClientsRepository for PostgresClientsRepository {
         .fetch_all(&self.pg_pool)
         .await
     }
+    async fn find_one(
+        &self,
+        vpn_id: &EntityId,
+        terminal_id: &EntityId,
+    ) -> sqlx::Result<ClientOutline> {
+        let vpn_id: uuid::Uuid = vpn_id.into();
+        let terminal_id: uuid::Uuid = terminal_id.into();
+
+        sqlx::query_as!(
+            ClientOutline,
+            r#"
+                 SELECT /* server.clients.find_one*/
+                        c.vpn_id 
+                      , v.vpn_name 
+                      , t.terminal_id 
+                      , t.terminal_name 
+                      , t.owner_user_id 
+                      , c.allowed_ip 
+                      , c.public_key 
+                      , c.created_at 
+                      , c.approved_at IS NOT NULL AS is_approved
+                   FROM clients c
+             INNER JOIN vpns v
+                     ON c.vpn_id = v.vpn_id
+             INNER JOIN terminals t
+                     ON c.terminal_id = t.terminal_id
+                  WHERE 1 = 1
+                    AND v.vpn_id      = $1
+                    AND c.terminal_id = $2
+                AND NOT c.is_deleted
+                AND NOT t.is_deleted 
+             ;
+            "#,
+            vpn_id,
+            terminal_id
+        )
+        .fetch_one(&self.pg_pool)
+        .await
+    }
+
     async fn create(
         &self,
         tx: &mut Transaction<'_, sqlx::Postgres>,

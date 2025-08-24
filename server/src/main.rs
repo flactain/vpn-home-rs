@@ -56,14 +56,19 @@ async fn main() {
     let postgres_clients_repository = PostgresClientsRepository::new(pool.clone());
     let postgres_terminals_repository = PostgresTerminalsRepository::new(pool.clone());
     // DI container (external)
-    let message_sqs_service =
-        SqsMessageService::new(Arc::new(sqs_client), config.clone().aws_queue_url);
+    let message_sqs_service = Arc::new(SqsMessageService::new(
+        Arc::new(sqs_client),
+        config.clone().aws_queue_url,
+    ));
     //DI container (service)
     let servers_service = ServersService::new(Arc::new(postgres_servers_repository));
-    let vpns_service = VpnsService::new(Arc::new(postgres_vpns_repository));
+    let vpns_service = VpnsService::new(
+        Arc::new(postgres_vpns_repository),
+        message_sqs_service.clone(),
+    );
     let clients_service = ClientsService::new(
         Arc::new(postgres_clients_repository),
-        Arc::new(message_sqs_service),
+        message_sqs_service.clone(),
     );
     let terminals_service = TerminalsService::new(Arc::new(postgres_terminals_repository));
 

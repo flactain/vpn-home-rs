@@ -1,25 +1,35 @@
 use defguard_wireguard_rs::{InterfaceConfiguration, Userspace, WGApi, WireguardInterfaceApi};
+use vpn_libs::entities::errors::AppError;
 
 use crate::entities::wireguard::{HostConfig, PeerConfig};
 
-pub async fn reconstruct_interface(
-    host_config: HostConfig,
-    peer_configs: Vec<PeerConfig>,
-) -> anyhow::Result<()> {
-    let wgapi = WGApi::<Userspace>::new(host_config.config_name.clone())?;
-    let interface_configuration: InterfaceConfiguration = host_config.into();
+pub struct WireguardClient {
+    wg_api: WGApi<Userspace>,
+    host_configuration: InterfaceConfiguration,
+}
 
-    //既存のモノなら再設定、新規なら作成
-    match wgapi.read_interface_data() {
-        Ok(_) => wgapi.configure_interface(&interface_configuration)?,
-        Err(_) => wgapi.configure_interface(&interface_configuration)?,
-    };
+impl WireguardClient {
+    pub fn new(host_config: HostConfig) -> Result<Self, AppError> {
+        let wg_api = WGApi::<Userspace>::new(host_config.config_name.clone());
+        let interface_configuration = host_config.into();
+        match wg_api {
+            Ok(wg_api) => {
+                wg_api.configure_interface(&interface_configuration);
+                Ok(Self {
+                    wg_api,
+                    host_configuration: interface_configuration,
+                })
+            }
+            Err(err) => Err(AppError::VpnConfigurationError(err)),
+        }
+    }
 
-    //クライアントの追加
-    peer_configs
-        .iter()
-        .for_each(|peer| wgapi.configure_peer(&peer.into()).unwrap());
+    pub fn add_peers(&self, peer_configs: Vec<PeerConfig>) -> anyhow::Result<()> {
+        //クライアントの追加
+        peer_configs
+            .iter()
+            .for_each(|peer| self.wg_api.configure_peer(&peer.into()).unwrap());
 
-    //ここまで来れば成功！
-    Ok(())
+        Ok(())
+    }
 }

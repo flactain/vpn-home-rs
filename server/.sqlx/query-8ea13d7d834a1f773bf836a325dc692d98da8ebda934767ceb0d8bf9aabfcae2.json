@@ -1,0 +1,70 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                  WITH /* vpns.findAll */ clients_count AS (\n                       SELECT \n                              c.vpn_id\n                            , count(1) AS clients_count\n                       FROM clients c \n                       WHERE 1 = 1\n                         AND NOT c.is_deleted\n                         AND c.approved_at IS NOT NULL\n                       GROUP BY c.vpn_id \n                 )\n                SELECT \n                       v.vpn_id \n                     , v.vpn_name\n                     , v.owner_user_id \n                     , t.terminal_name AS server_name\n                     , s.public_ip \n                     , s.private_ip \n                     , c.clients_count \n                     , v.approved_at IS NOT NULL AS is_approved\n                     , v.created_at\n                  FROM vpns v\n            INNER JOIN servers s \n                    ON v.vpn_id =s.vpn_id \n            INNER JOIN terminals t \n                    ON s.terminal_id = t.terminal_id \n            INNER JOIN clients_count c\n                    ON v.vpn_id = c.vpn_id \n                 WHERE 1 = 1\n                   AND v.vpn_id = $1\n                   AND v.approved_at is NULL\n                   AND NOT v.is_deleted\n                   AND NOT t.is_deleted\n            ;\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "vpn_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "vpn_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "owner_user_id",
+        "type_info": "Bpchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "server_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "public_ip",
+        "type_info": "Inet"
+      },
+      {
+        "ordinal": 5,
+        "name": "private_ip",
+        "type_info": "Inet"
+      },
+      {
+        "ordinal": 6,
+        "name": "clients_count",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 7,
+        "name": "is_approved",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 8,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null,
+      null,
+      true
+    ]
+  },
+  "hash": "8ea13d7d834a1f773bf836a325dc692d98da8ebda934767ceb0d8bf9aabfcae2"
+}

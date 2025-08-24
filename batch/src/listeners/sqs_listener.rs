@@ -1,17 +1,18 @@
 use aws_sdk_sqs::{operation::receive_message::ReceiveMessageOutput, types::Message};
 use log::{debug, error};
 use tokio::task;
-use vpn_libs::entities::messages::{AppMessage, MessageType};
+use vpn_libs::entities::{errors::AppError, messages::MessageType};
 
-use crate::{entities::error::AppError, handlers};
+use crate::handlers::message_handler::MessageHandler;
 
 pub struct SqsListener {
     queue_url: String,
     sqs_client: aws_sdk_sqs::Client,
+    message_handler: MessageHandler,
 }
 
 impl SqsListener {
-    pub async fn new(queue_url: String) -> Self {
+    pub async fn new(queue_url: String, message_handler: MessageHandler) -> Self {
         let aws_config = aws_config::defaults(aws_config::BehaviorVersion::v2025_01_17())
             .region(aws_config::Region::new(
                 std::env::var("AWS_REGION").unwrap(),
@@ -23,6 +24,7 @@ impl SqsListener {
         Self {
             queue_url,
             sqs_client,
+            message_handler,
         }
     }
 
@@ -53,15 +55,24 @@ impl SqsListener {
         // message identify
         let receipt_handle = message.receipt_handle().unwrap();
         let message_id = message.message_id().unwrap();
-        let message_body: AppMessage =
-            serde_json::from_str(message.body().unwrap()).unwrap_or(AppMessage::default());
+        let message_body = serde_json::from_str(message.body().unwrap()).unwrap();
+        let message_type: MessageType = serde_json::from_str(
+            message
+                .message_attributes()
+                .unwrap()
+                .get("message_type")
+                .unwrap()
+                .string_value()
+                .unwrap(),
+        )
+        .unwrap();
 
         // match
         // process
-        let process_result = match message_body.message_type() {
-            MessageType::RequestClient => handlers::message_handler::create_client().await,
+        let process_result = match message_type {
+            MessageType::RequestClient => self.message_handler.create_client().await,
             MessageType::RequestVpn => Ok(()),
-            MessageType::ApproveClient => handlers::message_handler::approve_client().await,
+            MessageType::ApproveClient => self.message_handler.approve_client(message_body).await,
             MessageType::ApproveVpn => Ok(()),
             MessageType::Default => Err(AppError::InvalidInput(message_body.to_string())),
         };

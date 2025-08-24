@@ -1,6 +1,7 @@
 use std::fmt::Debug;
 
 use axum::{Json, http::StatusCode, response::IntoResponse};
+use defguard_wireguard_rs::error::WireguardInterfaceError;
 use log::error;
 use sqlx::{self};
 use thiserror::Error;
@@ -20,6 +21,9 @@ pub enum AppError {
 
     #[error(transparent)]
     AnyhowError(#[from] anyhow::Error),
+
+    #[error["bad configuration of vpn server"]]
+    VpnConfigurationError(#[from] WireguardInterfaceError),
 }
 
 impl From<sqlx::Error> for AppError {
@@ -78,6 +82,14 @@ impl IntoResponse for AppError {
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     Json(ResponseDto::new(anyhow_error.to_string().as_str(), "")),
+                )
+                    .into_response()
+            }
+            err => {
+                error!("no handled error");
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(ResponseDto::new(err.to_string().as_str(), "")),
                 )
                     .into_response()
             }

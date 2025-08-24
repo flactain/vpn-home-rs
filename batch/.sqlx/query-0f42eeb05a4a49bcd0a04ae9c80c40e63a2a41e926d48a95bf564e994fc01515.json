@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT /* batch.PostgresServersRepository.find_server_config */\n                   s.config_name \n                 , NULL          AS private_key\n                 , s.private_ip  AS address\n                 , 51280         AS \"port!\"\n              FROM servers s\n        INNER JOIN vpns v\n                ON s.vpn_id = s.vpn_id \n             WHERE 1=1\n               AND s.vpn_id = $1\n               AND NOT s.is_deleted \n               AND NOT v.is_deleted \n        ;\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "config_name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "private_key",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "address",
+        "type_info": "Inet"
+      },
+      {
+        "ordinal": 3,
+        "name": "port!",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false,
+      null
+    ]
+  },
+  "hash": "0f42eeb05a4a49bcd0a04ae9c80c40e63a2a41e926d48a95bf564e994fc01515"
+}
