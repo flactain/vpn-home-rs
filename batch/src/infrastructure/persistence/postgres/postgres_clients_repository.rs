@@ -1,8 +1,11 @@
 use async_trait::async_trait;
 use sqlx::PgPool;
-use vpn_libs::entities::clients::ClientOutline;
+use vpn_libs::entities::{clients::ClientOutline, ids::EntityId};
 
-use crate::infrastructure::persistence::clients_repository::ClientsRepository;
+use crate::{
+    entities::wireguard::PeerConfig,
+    infrastructure::persistence::clients_repository::ClientsRepository,
+};
 
 pub struct PostgresClientsRepository {
     pub pg_pool: PgPool,
@@ -49,6 +52,28 @@ impl ClientsRepository for PostgresClientsRepository {
             terminal_id
         )
         .fetch_one(&self.pg_pool)
+        .await
+    }
+    async fn find_client_configs(&self, vpn_id: &EntityId) -> sqlx::Result<Vec<PeerConfig>> {
+        let vpn_id: uuid::Uuid = vpn_id.into();
+        sqlx::query_as!(
+            PeerConfig,
+            r#"
+        SELECT /* batch.PostgresClientsRepository.find_client_config */
+                   c.public_key         AS public_key
+                 , c.allowed_ip         AS allowed_ip
+                 , s.keep_alive_second  AS persistent_keepalive_interval
+              FROM clients c 
+        INNER JOIN servers s 
+                ON c.vpn_id = s.vpn_id 
+             WHERE 1=1
+               AND c.vpn_id = $1
+               AND NOT c.is_deleted 
+        ;
+        "#,
+            vpn_id
+        )
+        .fetch_all(&self.pg_pool)
         .await
     }
 }

@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT /* batch.PostgresClientsRepository.find_client_config */\n                   c.public_key         AS public_key\n                 , c.allowed_ip         AS allowed_ip\n                 , s.keep_alive_second  AS persistent_keepalive_interval\n              FROM clients c \n        INNER JOIN servers s \n                ON c.vpn_id = s.vpn_id \n             WHERE 1=1\n               AND c.vpn_id = $1\n               AND NOT c.is_deleted \n        ;\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "public_key",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "allowed_ip",
+        "type_info": "Inet"
+      },
+      {
+        "ordinal": 2,
+        "name": "persistent_keepalive_interval",
+        "type_info": "Int2"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "6def8c84d336e6f0183eef5e93a3c560b454195ab01c565ae88e957ea3535540"
+}
