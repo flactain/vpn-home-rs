@@ -1,20 +1,23 @@
-use defguard_wireguard_rs::{InterfaceConfiguration, Userspace, WGApi, WireguardInterfaceApi};
+use defguard_wireguard_rs::{InterfaceConfiguration, Kernel, WGApi, WireguardInterfaceApi};
 use vpn_libs::entities::errors::AppError;
 
 use crate::entities::wireguard::{HostConfig, PeerConfig};
 
 pub struct WireguardClient {
-    wg_api: WGApi<Userspace>,
+    wg_api: WGApi<Kernel>,
     host_configuration: InterfaceConfiguration,
 }
 
 impl WireguardClient {
     pub fn new(host_config: HostConfig) -> Result<Self, AppError> {
-        let wg_api = WGApi::<Userspace>::new(host_config.config_name.clone());
+        let wg_api = WGApi::<Kernel>::new(host_config.config_name.clone());
         let interface_configuration = host_config.into();
         match wg_api {
             Ok(wg_api) => {
-                wg_api.configure_interface(&interface_configuration);
+                wg_api.create_interface().unwrap();
+                wg_api
+                    .configure_interface(&interface_configuration)
+                    .unwrap();
                 Ok(Self {
                     wg_api,
                     host_configuration: interface_configuration,
