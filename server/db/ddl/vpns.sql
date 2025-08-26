@@ -4,10 +4,11 @@ CREATE TABLE vpns(
   vpn_id UUID NOT NULL,
   vpn_name VARCHAR(20) NOT NULL,
   owner_user_id CHAR(32) NOT NULL,
+  requested_at timestamp NULL,
   approved_at TIMESTAMP,
-  is_deleted bool DEFAULT false NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  is_deleted bool DEFAULT false NOT NULL,
   PRIMARY KEY(vpn_id)
 );
 

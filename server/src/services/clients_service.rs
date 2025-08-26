@@ -3,7 +3,10 @@ use std::sync::Arc;
 use log::debug;
 use sqlx::Transaction;
 use vpn_libs::entities::{
-    clients::ClientOutline, errors::AppError, ids::EntityId, messages::MessageType,
+    clients::ClientOutline,
+    errors::AppError,
+    ids::EntityId,
+    messages::{MessageType, ResourceHandle, ResourceType},
 };
 
 use crate::{
@@ -85,11 +88,10 @@ impl ClientsService {
             Err(err) => Err(AppError::DatabaseError(err)),
         }?;
 
+        let message_type = MessageType::new(ResourceType::Client, ResourceHandle::Create);
+
         self.message_service
-            .send(
-                MessageType::ApproveClient,
-                serde_json::to_string(&client).unwrap(),
-            )
+            .send(message_type, serde_json::to_string(&client).unwrap())
             .await
     }
 }

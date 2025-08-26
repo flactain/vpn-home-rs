@@ -1,23 +1,8 @@
 use serde::{Deserialize, Serialize};
-use vpn_libs::entities::ids::EntityId;
-
-#[derive(sqlx::Type, Deserialize, Serialize, Clone, Debug)]
-#[sqlx(type_name = "TEXT", rename_all = "UPPERCASE")]
-#[serde(rename_all = "UPPERCASE")]
-pub enum ResourceType {
-    Vpn,
-    Client,
-}
-
-#[derive(sqlx::Type, Deserialize, Serialize, Clone, Debug)]
-#[sqlx(type_name = "TEXT", rename_all = "UPPERCASE")]
-#[serde(rename_all = "UPPERCASE")]
-pub enum ResourceHandle {
-    Create,
-    Edit,
-    Delete,
-    Archive,
-}
+use vpn_libs::entities::{
+    ids::EntityId,
+    messages::{MessageType, ResourceHandle, ResourceType},
+};
 
 #[derive(sqlx::FromRow, Deserialize, Serialize, Clone, Debug)]
 pub struct ApprovalRequest {
@@ -30,4 +15,12 @@ pub struct ApprovalRequest {
     #[serde(default)]
     pub request_user_id: String,
     pub approved_at: Option<chrono::NaiveDateTime>,
+}
+
+impl From<ApprovalRequest> for MessageType {
+    fn from(value: ApprovalRequest) -> Self {
+        let resource_type = value.resource_type;
+        let resource_handle = value.resource_handle;
+        MessageType::new(resource_type, resource_handle)
+    }
 }

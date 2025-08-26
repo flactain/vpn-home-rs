@@ -21,13 +21,7 @@ impl SqsMessageService {
     }
 
     pub fn get_queue_url(&self, message_type: MessageType) -> String {
-        match message_type {
-            MessageType::RequestVpn => self.general_queue_url.clone(),
-            MessageType::RequestClient => self.general_queue_url.clone(),
-            MessageType::ApproveVpn => self.general_queue_url.clone(),
-            MessageType::ApproveClient => self.general_queue_url.clone(),
-            MessageType::Default => self.general_queue_url.clone(),
-        }
+        self.general_queue_url.clone()
     }
 }
 
@@ -35,9 +29,14 @@ impl SqsMessageService {
 impl MessageService for SqsMessageService {
     async fn send(&self, message_type: MessageType, message_body: String) -> Result<(), AppError> {
         debug!("sqs enqueue!");
-        let message_attribute = MessageAttributeValue::builder()
+        let resource_type_attr = MessageAttributeValue::builder()
             .data_type("String")
-            .string_value(message_type.to_string())
+            .string_value(message_type.resource_type.to_string())
+            .build()
+            .map_err(|_| anyhow::anyhow!("Failed to set MessageType of Request"))?;
+        let resource_handle_attr = MessageAttributeValue::builder()
+            .data_type("String")
+            .string_value(message_type.resource_handle.to_string())
             .build()
             .map_err(|_| anyhow::anyhow!("Failed to set MessageType of Request"))?;
 
@@ -45,7 +44,8 @@ impl MessageService for SqsMessageService {
             .send_message()
             .queue_url(self.get_queue_url(message_type))
             .message_body(message_body)
-            .message_attributes("message_type", message_attribute)
+            .message_attributes("resource_type", resource_type_attr)
+            .message_attributes("resource_handle", resource_handle_attr)
             .send()
             .await
             .map_err(|_| anyhow::anyhow!("Failed to Queue a request."))?;

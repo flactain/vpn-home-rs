@@ -1,7 +1,11 @@
 use std::sync::Arc;
 
 use log::debug;
-use vpn_libs::entities::{errors::AppError, messages::MessageType, vpns::VpnOutline};
+use vpn_libs::entities::{
+    errors::AppError,
+    messages::{MessageType, ResourceHandle, ResourceType},
+    vpns::VpnOutline,
+};
 
 use crate::{
     entities::approvals::ApprovalRequest, repositories::vpns_repository::VpnsRepository,
@@ -58,11 +62,10 @@ impl VpnsService {
         //sqs enqueue
         debug!("vpn sqs approval enqueue");
 
+        let message_type = MessageType::new(ResourceType::Vpn, ResourceHandle::Create);
+
         self.message_service
-            .send(
-                MessageType::ApproveVpn,
-                serde_json::to_string(&vpn).unwrap(),
-            )
+            .send(message_type, serde_json::to_string(&vpn).unwrap())
             .await
     }
 }
