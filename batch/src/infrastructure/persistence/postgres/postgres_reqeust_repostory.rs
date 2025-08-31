@@ -2,7 +2,7 @@ use std::ops::DerefMut;
 
 use async_trait::async_trait;
 use sqlx::{PgPool, Transaction, any::AnyQueryResult};
-use vpn_libs::entities::clients::ClientOutline;
+use vpn_libs::entities::clients::Client;
 
 use crate::infrastructure::persistence::request_repository::RequestRepository;
 
@@ -18,12 +18,12 @@ impl PostgresRequestRepository {
 
 #[async_trait]
 impl RequestRepository for PostgresRequestRepository {
-    async fn find_one_client(&self, client_outline: &ClientOutline) -> sqlx::Result<ClientOutline> {
+    async fn find_one_client(&self, client_outline: &Client) -> sqlx::Result<Client> {
         let vpn_id: uuid::Uuid = client_outline.clone().vpn_id.into();
         let terminal_id: uuid::Uuid = client_outline.clone().terminal_id.into();
 
         sqlx::query_as!(
-            ClientOutline,
+            Client,
             r#"
          SELECT /* batch.PostgresRequestRepository.find_one_client()*/
                    c.vpn_id
@@ -56,7 +56,7 @@ impl RequestRepository for PostgresRequestRepository {
     async fn approve_client_request(
         &self,
         tx: &mut Transaction<'_, sqlx::Postgres>,
-        client_outline: &ClientOutline,
+        client_outline: &Client,
     ) -> sqlx::Result<AnyQueryResult> {
         let result = sqlx::query(
             r#"

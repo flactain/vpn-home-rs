@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use vpn_libs::entities::{clients::ClientOutline, errors::AppError};
+use vpn_libs::entities::{clients::Client, errors::AppError};
 
 use crate::{
     config::Config,
@@ -38,7 +38,7 @@ impl MessageHandler {
 
     pub async fn approve_client(&self, client_outline: String) -> Result<(), AppError> {
         // Convert
-        let client_outline: ClientOutline = serde_json::from_str(client_outline.as_str())
+        let client_outline: Client = serde_json::from_str(client_outline.as_str())
             .map_err(|_| AppError::InvalidInput("Failed to Deserialize Client info".to_string()))?;
 
         let mut tx = Config::get_app_state().pg_pool.begin().await.unwrap();

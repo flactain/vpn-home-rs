@@ -2,7 +2,7 @@ use std::ops::DerefMut;
 
 use async_trait::async_trait;
 use sqlx::{PgPool, Transaction, any::AnyQueryResult};
-use vpn_libs::entities::{ids::EntityId, terminals::TerminalOutline};
+use vpn_libs::entities::{ids::EntityId, terminals::Terminal};
 
 use crate::repositories::terminals_repository::TerminalsRepository;
 
@@ -44,9 +44,9 @@ impl TerminalsRepository for PostgresTerminalsRepository {
         }
     }
 
-    async fn find_by_user_id(&self, owner_user_id: &str) -> sqlx::Result<Vec<TerminalOutline>> {
+    async fn find_by_user_id(&self, owner_user_id: &str) -> sqlx::Result<Vec<Terminal>> {
         sqlx::query_as!(
-            TerminalOutline,
+            Terminal,
             r#"
             SELECT /* terminals.find_by_user_id */
                    terminal_id
@@ -70,7 +70,7 @@ impl TerminalsRepository for PostgresTerminalsRepository {
     async fn create(
         &self,
         tx: &mut Transaction<'_, sqlx::Postgres>,
-        terminal_info: &TerminalOutline,
+        terminal_info: &Terminal,
     ) -> sqlx::Result<AnyQueryResult, sqlx::Error> {
         let result = sqlx::query(
             r#"

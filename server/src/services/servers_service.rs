@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use log::debug;
-use vpn_libs::entities::{errors::AppError, servers::ServerEntity};
+use vpn_libs::entities::{errors::AppError, servers::Server};
 
 use crate::repositories::servers_repository::ServersRepository;
 
@@ -13,7 +13,7 @@ impl ServersService {
     pub fn new(servers_repository: Arc<dyn ServersRepository>) -> Self {
         Self { servers_repository }
     }
-    pub async fn search_all_servers(&self) -> Result<Vec<ServerEntity>, AppError> {
+    pub async fn search_all_servers(&self) -> Result<Vec<Server>, AppError> {
         debug!("services: search_all_servers");
         match self.servers_repository.find_all().await {
             Ok(server_outlines) => Ok(server_outlines),

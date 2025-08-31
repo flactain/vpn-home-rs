@@ -118,6 +118,7 @@ pub async fn create_clients(
     let mut client_outline = payload.client_info;
     let terminal_outline = payload.terminal_info;
 
+    // tx start
     let mut tx = state.pool.begin().await.unwrap();
     // terminal check
     // 新規端末登録あり
@@ -135,19 +136,16 @@ pub async fn create_clients(
             } else if let Err(err) = result {
                 return err.into_response();
             }
-        } else {
-            return AppError::InvalidInput(terminal_outline.terminal_id.to_string())
-                .into_response();
         }
 
     // 新規端末登録なしで存在しない
     } else {
-        let exists_terminal = state
+        let not_exists_terminal = !state
             .terminals_service
             .exists(&client_outline.terminal_id)
             .await;
 
-        if !exists_terminal {
+        if not_exists_terminal {
             return AppError::InvalidInput(client_outline.terminal_id.to_string()).into_response();
         }
     }
@@ -158,6 +156,7 @@ pub async fn create_clients(
         .register_client(&mut tx, client_outline)
         .await;
 
+    // transaction commit
     tx.commit().await.unwrap();
 
     match result {

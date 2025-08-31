@@ -2,7 +2,7 @@ use std::ops::DerefMut;
 
 use async_trait::async_trait;
 use sqlx::{PgPool, Transaction, any::AnyQueryResult};
-use vpn_libs::entities::{clients::ClientOutline, ids::EntityId};
+use vpn_libs::entities::{clients::Client, ids::EntityId};
 
 use crate::repositories::clients_repository::ClientsRepository;
 
@@ -18,9 +18,9 @@ impl PostgresClientsRepository {
 
 #[async_trait]
 impl ClientsRepository for PostgresClientsRepository {
-    async fn find_by_vpn_id(&self, vpn_id: EntityId) -> sqlx::Result<Vec<ClientOutline>> {
+    async fn find_by_vpn_id(&self, vpn_id: EntityId) -> sqlx::Result<Vec<Client>> {
         sqlx::query_as!(
-            ClientOutline,
+            Client,
             r#"
                  SELECT /* clients.findClients */
                         c.vpn_id 
@@ -48,16 +48,12 @@ impl ClientsRepository for PostgresClientsRepository {
         .fetch_all(&self.pg_pool)
         .await
     }
-    async fn find_one(
-        &self,
-        vpn_id: &EntityId,
-        terminal_id: &EntityId,
-    ) -> sqlx::Result<ClientOutline> {
+    async fn find_one(&self, vpn_id: &EntityId, terminal_id: &EntityId) -> sqlx::Result<Client> {
         let vpn_id: uuid::Uuid = vpn_id.into();
         let terminal_id: uuid::Uuid = terminal_id.into();
 
         sqlx::query_as!(
-            ClientOutline,
+            Client,
             r#"
                  SELECT /* server.clients.find_one*/
                         c.vpn_id 
@@ -91,7 +87,7 @@ impl ClientsRepository for PostgresClientsRepository {
     async fn create(
         &self,
         tx: &mut Transaction<'_, sqlx::Postgres>,
-        client_info: ClientOutline,
+        client_info: Client,
     ) -> sqlx::Result<AnyQueryResult> {
         let result = sqlx::query(
             r#"

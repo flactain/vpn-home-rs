@@ -5,7 +5,7 @@ use sqlx::types::{chrono, ipnet::IpNet};
 use crate::entities::ids::EntityId;
 
 #[derive(sqlx::FromRow, Serialize, Deserialize)]
-pub struct ServerEntity {
+pub struct Server {
     pub vpn_id: EntityId,
     pub vpn_name: String,
     pub terminal_id: EntityId,

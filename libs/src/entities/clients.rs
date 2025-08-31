@@ -6,7 +6,7 @@ use crate::entities::ids::EntityId;
 
 // Client概要
 #[derive(sqlx::FromRow, Serialize, Clone, Deserialize, Debug)]
-pub struct ClientOutline {
+pub struct Client {
     pub vpn_id: EntityId,
     pub vpn_name: Option<String>,
     pub terminal_id: EntityId,

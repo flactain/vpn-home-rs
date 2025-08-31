@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use sqlx::PgPool;
-use vpn_libs::entities::servers::ServerEntity;
+use vpn_libs::entities::servers::Server;
 
 use crate::repositories::servers_repository::ServersRepository;
 
@@ -16,9 +16,9 @@ impl PostgresServersRepository {
 
 #[async_trait]
 impl ServersRepository for PostgresServersRepository {
-    async fn find_all(&self) -> Result<Vec<ServerEntity>, sqlx::Error> {
+    async fn find_all(&self) -> Result<Vec<Server>, sqlx::Error> {
         sqlx::query_as!(
-            ServerEntity,
+            Server,
             r#"
                 SELECT /* servers.findAll */
                   s.vpn_id

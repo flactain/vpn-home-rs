@@ -47,9 +47,7 @@ impl VpnsRepository for PostgresVpnsRepository {
                     ON s.terminal_id = t.terminal_id 
             INNER JOIN clients_count c
                     ON v.vpn_id = c.vpn_id 
-                 WHERE 1 = 1
-                   AND NOT v.is_deleted
-                   AND NOT t.is_deleted
+                 WHERE 1 = 1 AND NOT v.is_deleted AND NOT t.is_deleted
             ;
         "#
         )
@@ -147,53 +145,4 @@ impl VpnsRepository for PostgresVpnsRepository {
 
         Ok(rows)
     }
-    // async fn approve_vpn(&self, approval_request: ApprovalRequest) -> sqlx::Result<AnyQueryResult> {
-    //     let result = sqlx::query(
-    //         r#"
-    //         UPDATE vpns v
-    //            SET approved_at = clock_timestamp()
-    //              , updated_at = clock_timestamp()
-    //          WHERE 1=1
-    //            AND v.vpn_id = $1
-    //            AND v.approved_at IS NULL
-    //        AND NOT v.is_deleted
-    //        ;
-    //        "#,
-    //     )
-    //     .bind(approval_request.vpn_id())
-    //     .execute(&self.pg_pool)
-    //     .await;
-
-    //     match result {
-    //         Ok(result) => Ok(result.into()),
-    //         Err(err) => Err(err),
-    //     }
-    // }
-    // async fn approve_client(
-    //     &self,
-    //     approval_request: ApprovalRequest,
-    // ) -> Result<AnyQueryResult, sqlx::Error> {
-    //     let result = sqlx::query(
-    //         r#"
-    //         UPDATE clients c
-    //            SET approved_at = clock_timestamp()
-    //              , updated_at = clock_timestamp()
-    //          WHERE 1=1
-    //            AND c.vpn_id = $1
-    //            AND c.terminal_id =$2
-    //            AND c.approved_at IS NULL
-    //        AND NOT c.is_deleted
-    //        ;
-    //        "#,
-    //     )
-    //     .bind(approval_request.vpn_id())
-    //     .bind(approval_request.resource_id())
-    //     .execute(&self.pg_pool)
-    //     .await;
-
-    //     match result {
-    //         Ok(result) => Ok(result.into()),
-    //         Err(err) => Err(err),
-    //     }
-    // }
 }

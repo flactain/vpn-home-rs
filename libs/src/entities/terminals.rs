@@ -4,7 +4,7 @@ use sqlx::types::chrono;
 use crate::entities::ids::EntityId;
 
 #[derive(sqlx::FromRow, Serialize, Deserialize, Debug, Clone)]
-pub struct TerminalOutline {
+pub struct Terminal {
     #[serde(default)]
     pub terminal_id: EntityId,
     pub terminal_name: String,

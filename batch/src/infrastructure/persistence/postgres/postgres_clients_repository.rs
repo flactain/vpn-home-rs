@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use sqlx::PgPool;
-use vpn_libs::entities::{clients::ClientOutline, ids::EntityId};
+use vpn_libs::entities::{clients::Client, ids::EntityId};
 
 use crate::{
     entities::wireguard::PeerConfig,
@@ -19,12 +19,12 @@ impl PostgresClientsRepository {
 
 #[async_trait]
 impl ClientsRepository for PostgresClientsRepository {
-    async fn find_one(&self, client_outline: ClientOutline) -> sqlx::Result<ClientOutline> {
+    async fn find_one(&self, client_outline: Client) -> sqlx::Result<Client> {
         let vpn_id: uuid::Uuid = client_outline.vpn_id.into();
         let terminal_id: uuid::Uuid = client_outline.terminal_id.into();
 
         sqlx::query_as!(
-            ClientOutline,
+            Client,
             r#"
          SELECT /* batch.PostgresRequestRepository.find_one_client()*/
                    c.vpn_id

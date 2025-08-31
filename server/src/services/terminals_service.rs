@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use log::debug;
 use sqlx::Transaction;
-use vpn_libs::entities::{errors::AppError, ids::EntityId, terminals::TerminalOutline};
+use vpn_libs::entities::{errors::AppError, ids::EntityId, terminals::Terminal};
 
 use crate::repositories::terminals_repository::TerminalsRepository;
 
@@ -20,7 +20,7 @@ impl TerminalsService {
     pub async fn search_by_owner_user_id(
         &self,
         owner_user_id: &str,
-    ) -> Result<Vec<TerminalOutline>, AppError> {
+    ) -> Result<Vec<Terminal>, AppError> {
         debug!("services: search_by_owner_user_id");
 
         match self
@@ -44,7 +44,7 @@ impl TerminalsService {
     pub async fn register(
         &self,
         tx: &mut Transaction<'_, sqlx::Postgres>,
-        terminal_info: &TerminalOutline,
+        terminal_info: &Terminal,
     ) -> Result<(), AppError> {
         match self.terminals_repository.create(tx, terminal_info).await {
             Ok(result) => {
