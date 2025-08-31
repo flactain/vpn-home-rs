@@ -36,11 +36,7 @@ impl MessageHandler {
         Ok(())
     }
 
-    pub async fn approve_client(&self, client_outline: String) -> Result<(), AppError> {
-        // Convert
-        let client_outline: Client = serde_json::from_str(client_outline.as_str())
-            .map_err(|_| AppError::InvalidInput("Failed to Deserialize Client info".to_string()))?;
-
+    pub async fn approve_client(&self, client_outline: Client) -> Result<(), AppError> {
         let mut tx = Config::get_app_state().pg_pool.begin().await.unwrap();
 
         // Approve Request on using Repository

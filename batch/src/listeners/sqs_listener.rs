@@ -2,8 +2,9 @@ use aws_sdk_sqs::{operation::receive_message::ReceiveMessageOutput, types::Messa
 use log::{debug, error};
 use tokio::task;
 use vpn_libs::entities::{
+    clients::Client,
     errors::AppError,
-    messages::{MessageType, ResourceHandle, ResourceType},
+    messages::{ResourceHandle, ResourceType},
 };
 
 use crate::handlers::message_handler::MessageHandler;
@@ -55,25 +56,32 @@ impl SqsListener {
     }
 
     async fn process(&self, message: &Message) -> Result<(), AppError> {
+        debug!("process");
         // message identify
         let receipt_handle = message.receipt_handle().unwrap();
         let message_id = message.message_id().unwrap();
-        let message_body = serde_json::from_str(message.body().unwrap()).unwrap();
-        let message_type: MessageType = serde_json::from_str(
-            message
-                .message_attributes()
-                .unwrap()
-                .get("message_type")
-                .unwrap()
-                .string_value()
-                .unwrap(),
-        )
-        .unwrap();
+        let message_attributes = message.message_attributes().unwrap();
+        let resource_type: ResourceType = message_attributes
+            .get("resource_type")
+            .expect("1")
+            .string_value()
+            .expect("2")
+            .parse()
+            .unwrap();
+        let resource_handle: ResourceHandle = message_attributes
+            .get("resource_handle")
+            .expect("1")
+            .string_value()
+            .expect("2")
+            .parse()
+            .unwrap();
+
+        let message_body: Client = serde_json::from_str(message.body().unwrap()).unwrap();
 
         // match
         // process
-        let process_result = match message_type.resource_type {
-            ResourceType::Client => match message_type.resource_handle {
+        let process_result = match resource_type {
+            ResourceType::Client => match resource_handle {
                 ResourceHandle::Create => Ok(()),
                 ResourceHandle::Edit => Ok(()),
                 ResourceHandle::Delete => Ok(()),
@@ -103,6 +111,8 @@ impl SqsListener {
             .queue_url(self.queue_url.clone())
             .wait_time_seconds(20)
             .max_number_of_messages(1)
+            .message_attribute_names("resource_handle")
+            .message_attribute_names("resource_type")
             .send()
             .await
         {

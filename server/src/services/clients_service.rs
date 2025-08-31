@@ -3,7 +3,7 @@ use std::sync::Arc;
 use log::debug;
 use sqlx::Transaction;
 use vpn_libs::entities::{
-    clients::Client,
+    clients::ClientOutline,
     errors::AppError,
     ids::EntityId,
     messages::{MessageType, ResourceHandle, ResourceType},
@@ -30,7 +30,7 @@ impl ClientsService {
         }
     }
 
-    pub async fn search_clients(&self, vpn_id: EntityId) -> Result<Vec<Client>, AppError> {
+    pub async fn search_clients(&self, vpn_id: EntityId) -> Result<Vec<ClientOutline>, AppError> {
         debug!("services: search_clients");
 
         let result = self.clients_repository.find_by_vpn_id(vpn_id).await;
@@ -45,7 +45,7 @@ impl ClientsService {
     pub async fn register_client(
         &self,
         tx: &mut Transaction<'_, sqlx::Postgres>,
-        client_info: Client,
+        client_info: ClientOutline,
     ) -> Result<(), AppError> {
         debug!("services: register_client");
 

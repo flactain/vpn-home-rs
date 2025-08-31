@@ -1,4 +1,5 @@
 use core::fmt;
+use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
 
@@ -49,6 +50,33 @@ impl fmt::Display for ResourceHandle {
         write!(f, "{}", s)
     }
 }
+
+impl FromStr for ResourceType {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "VPN" => Ok(ResourceType::Vpn),
+            "CLIENT" => Ok(ResourceType::Client),
+            _ => Err(format!("Unknown ResourceType: {}", s)),
+        }
+    }
+}
+
+impl FromStr for ResourceHandle {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "CREATE" => Ok(ResourceHandle::Create),
+            "EDIT" => Ok(ResourceHandle::Edit),
+            "DELETE" => Ok(ResourceHandle::Delete),
+            "ARCHIVE" => Ok(ResourceHandle::Archive),
+            "APPROVE" => Ok(ResourceHandle::Approve),
+            _ => Err(format!("Unknown ResourceHandle: {}", s)),
+        }
+    }
+}
+
 #[derive(sqlx::Type, Deserialize, Serialize, Clone, Debug)]
 #[sqlx(type_name = "TEXT", rename_all = "UPPERCASE")]
 #[serde(rename_all = "UPPERCASE")]
