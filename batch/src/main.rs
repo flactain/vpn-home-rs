@@ -42,7 +42,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     });
     Config::init_app_state(state).unwrap();
 
-    let listener = SqsListener::new(config.aws_queue_url, message_handler).await;
+    let listener =
+        SqsListener::new(config.aws_queue_url, config.aws_dlq_url, message_handler).await;
     listener.listen().await;
 
     Ok(())

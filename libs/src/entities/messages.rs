@@ -3,6 +3,8 @@ use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
 
+use crate::entities::errors::AppError;
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct MessageType {
@@ -52,19 +54,20 @@ impl fmt::Display for ResourceHandle {
 }
 
 impl FromStr for ResourceType {
-    type Err = String;
+    type Err = AppError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "VPN" => Ok(ResourceType::Vpn),
             "CLIENT" => Ok(ResourceType::Client),
-            _ => Err(format!("Unknown ResourceType: {}", s)),
+            _ => Err(AppError::InvalidInput(s.to_string())),
         }
     }
 }
 
 impl FromStr for ResourceHandle {
-    type Err = String;
+    type Err = AppError;
+
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "CREATE" => Ok(ResourceHandle::Create),
@@ -72,7 +75,7 @@ impl FromStr for ResourceHandle {
             "DELETE" => Ok(ResourceHandle::Delete),
             "ARCHIVE" => Ok(ResourceHandle::Archive),
             "APPROVE" => Ok(ResourceHandle::Approve),
-            _ => Err(format!("Unknown ResourceHandle: {}", s)),
+            _ => Err(AppError::InvalidInput(s.to_string())),
         }
     }
 }

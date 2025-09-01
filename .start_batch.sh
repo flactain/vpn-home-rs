@@ -30,6 +30,7 @@ echo "Running vpn-batch with sudo..."
 sudo DATABASE_URL="$DATABASE_URL" \
      WG_CONF_DIR="$WG_CONF_DIR" \
      AWS_QUEUE_URL="$AWS_QUEUE_URL" \
+     AWS_DLQ_URL="$AWS_DLQ_URL" \
      RUST_LOG=debug \
      RUST_BACKTRACE=full \
      PATH="$PATH" \

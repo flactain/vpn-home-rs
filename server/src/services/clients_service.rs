@@ -3,7 +3,7 @@ use std::sync::Arc;
 use log::debug;
 use sqlx::Transaction;
 use vpn_libs::entities::{
-    clients::ClientOutline,
+    clients::Client,
     errors::AppError,
     ids::EntityId,
     messages::{MessageType, ResourceHandle, ResourceType},
@@ -30,7 +30,7 @@ impl ClientsService {
         }
     }
 
-    pub async fn search_clients(&self, vpn_id: EntityId) -> Result<Vec<ClientOutline>, AppError> {
+    pub async fn search_clients(&self, vpn_id: EntityId) -> Result<Vec<Client>, AppError> {
         debug!("services: search_clients");
 
         let result = self.clients_repository.find_by_vpn_id(vpn_id).await;
@@ -45,7 +45,7 @@ impl ClientsService {
     pub async fn register_client(
         &self,
         tx: &mut Transaction<'_, sqlx::Postgres>,
-        client_info: ClientOutline,
+        client_info: Client,
     ) -> Result<(), AppError> {
         debug!("services: register_client");
 
@@ -66,16 +66,6 @@ impl ClientsService {
         }
 
         Ok(())
-
-        // sqs enqueue
-        // debug!("sqs enqueue!");
-
-        // self.message_service
-        //     .send(
-        //         MessageType::RequestClient,
-        //         serde_json::to_string(&client_info).unwrap(),
-        //     )
-        //     .await
     }
     pub async fn approve_client(&self, approval_request: ApprovalRequest) -> Result<(), AppError> {
         let client = match self
@@ -88,7 +78,7 @@ impl ClientsService {
             Err(err) => Err(AppError::DatabaseError(err)),
         }?;
 
-        let message_type = MessageType::new(ResourceType::Client, ResourceHandle::Create);
+        let message_type = MessageType::new(ResourceType::Client, ResourceHandle::Approve);
 
         self.message_service
             .send(message_type, serde_json::to_string(&client).unwrap())

@@ -4111,6 +4111,7 @@ name = "vpn-libs"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "aws-sdk-sqs",
  "axum",
  "base64 0.22.1",
  "chrono",

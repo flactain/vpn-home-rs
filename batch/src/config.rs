@@ -18,6 +18,7 @@ pub struct Config {
     pub database_url: String,
     pub wg_conf_dir: String,
     pub aws_queue_url: String,
+    pub aws_dlq_url: String,
     pub aws_region: String,
 }
 pub static APP_STATE: OnceLock<Arc<AppState>> = OnceLock::new();
